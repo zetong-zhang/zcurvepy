@@ -1,4 +1,4 @@
-# ZCurvePy (Lastest version 1.5.9)
+# ZCurvePy (Lastest version 1.5.10)
 *A high performance Python toolkit for the Z-curve theory developed by **T**ianjin **U**niversity **B**io**I**nformatics **C**enter (**TUBIC**)*
 
 ## Note:  
