@@ -1,0 +1,30 @@
+package:
+  name: zcurvepy
+  version: 1.5.10
+
+source:
+  path: .
+
+build:
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  host:
+    - python
+    - pip
+    - setuptools
+  run:
+    - python
+    - numpy==1.26.3
+    - biopython==1.84
+    - matplotlib>=3.7.0,<4.0.0
+    - ncbi-acc-download==0.2.9
+    - orfipy==0.0.4
+    - scikit-learn==1.6.1
+
+about:
+  home: https://zcurvepy-docs.readthedocs.io/
+  license: MIT
+  license_file: LICENSE
+  summary: High performance Python toolkit for the Z-curve theory

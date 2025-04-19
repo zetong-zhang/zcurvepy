@@ -37,68 +37,120 @@ static char *kwListCurve[] = {"window", "return_n", NULL};
 static char *kwListdSCurve[] = {"window", "return_n", "only_m", NULL};
 /* Modes for BatchZCurvePlotter */
 static char *plotterMode[] = {"accum", "profile", "tetra"};
-/* Following PyObject should be dealloc when the module is being freed */
 /* 
- * Convert C++ float array to Python list.
+ * Convert C++ float array to Numpy array.
  *
  * @param params  array to be converted to list
  * @param len     length of the array
  * @return        Python list object
  */
-static PyObject *toList(float *params, int len) {
-    /* PASS 2025-02-26 */
-    PyObject *value;
-    PyObject *paramList = PyList_New(len);
 
-    for (int i = 0; i < len; i ++) {
-        value = Py_BuildValue("f", params[i]);
-        PyList_SET_ITEM(paramList, i, value);
+static void deleteFloatArray(PyObject *capsule) {
+    float *array = static_cast<float*>(PyCapsule_GetPointer(capsule, "float_arr"));
+    delete[] array;
+}
+static PyObject *toNumpyArray(float *params, int len) {
+    import_array();
+    /* PASS 2025-04-17 */
+    npy_intp dims[] = { len };
+    PyObject* np_array = PyArray_SimpleNewFromData(1, dims, NPY_FLOAT32, params);
+
+    if (!np_array) {
+        delete[] params;
+        Py_RETURN_NONE;
+    }
+
+    PyObject* capsule = PyCapsule_New(params, "float_arr", deleteFloatArray);
+
+    if (!capsule) {
+        Py_DECREF(np_array);
+        delete[] params;
+        Py_RETURN_NONE;
+    }
+
+    if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(np_array), capsule) == -1) {
+        Py_DECREF(np_array);
+        Py_DECREF(capsule);
+        Py_RETURN_NONE;
     }
     
-    return paramList;
+    return np_array;
+}
+static void deleteIntArray(PyObject *capsule) {
+    float *array = static_cast<float*>(PyCapsule_GetPointer(capsule, "int_arr"));
+    delete[] array;
+}
+static PyObject *genNumpyArange(int len) {
+    import_array();
+    int *int_arr = new int[len];
+    for (int i = 0; i < len; i ++)
+        int_arr[i] = i;
+
+    npy_intp dims[] = { len };
+    PyObject* np_array = PyArray_SimpleNewFromData(1, dims, NPY_INT32, int_arr);
+
+    if (!np_array) {
+        delete[] int_arr;
+        Py_RETURN_NONE;
+    }
+
+    PyObject* capsule = PyCapsule_New(int_arr, "int_arr", deleteIntArray);
+
+    if (!capsule) {
+        Py_DECREF(np_array);
+        delete[] int_arr;
+        Py_RETURN_NONE;
+    }
+
+    if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(np_array), capsule) == -1) {
+        Py_DECREF(np_array);
+        Py_DECREF(capsule);
+        Py_RETURN_NONE;
+    }
+    
+    return np_array;
+}
+
+static PyObject* convertToNumpy(float** paramList, int rows, int cols) {
+    import_array();
+    npy_intp dims[2] = {rows, cols};
+    PyObject* np_array = PyArray_SimpleNew(2, dims, NPY_FLOAT32);
+    if (!np_array) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to create NumPy array");
+        return NULL;
+    }
+
+    float* np_data = (float*)PyArray_DATA((PyArrayObject*)np_array);
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            np_data[i * cols + j] = paramList[i][j];
+        }
+    }
+
+    return np_array;
 }
 /*
- * Convert curves as C++ float arrays to Python list.
+ * Convert curves as C++ float arrays to Numpy array.
  * Float arrays must be on heap memory and the function will be responsible for freeing memory.
  * 
  * @param params    array to be converted to list
  * @param len       length of the array
  * @param return_n  should return x values of 2D curves or not
- * @return          Python list object
+ * @return          Numpy array object
  */
 static PyObject *toCurve(float *params, int len, bool return_n) {
     /* PASS 2025-02-26 */
     PyObject *value;
 
     if (return_n) {
-        PyObject *xList = PyList_New(len);
-        PyObject *yList = PyList_New(len);
-
-        for (int i = 0; i < len; i++) {
-            value = Py_BuildValue("i", i);
-            PyList_SET_ITEM(xList, i, value);
-
-            value = Py_BuildValue("f", params[i]);
-            PyList_SET_ITEM(yList, i, value);
-        }
-
-        delete[] params;
+        PyObject *xList = genNumpyArange(len);
+        PyObject *yList = toNumpyArray(params, len);
         
         PyObject *retr = Py_BuildValue("[O,O]", xList, yList);
 
         return retr;
-    } else {
-        PyObject *yList = PyList_New(len);
-
-        for (int i = 0; i < len; i++) {
-            value = Py_BuildValue("f", params[i]);
-            PyList_SET_ITEM(yList, i, value);
-        }
-
-        delete[] params;
-
-        return yList;
-    }
+    } else return toNumpyArray(params, len);
 }
 /* Read batch data from iterable python object */
 /* 
@@ -656,7 +708,7 @@ static PyObject *ZCurveEncoder_CpGOrderIndex(ZCurveEncoderObject *self, PyObject
  */
 static PyObject *ZCurveEncoder_monoTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
-    float params[3] = {0.0F};
+    float *params = new float[3]();
     bool freq = false;
     bool local = false;
     
@@ -667,7 +719,7 @@ static PyObject *ZCurveEncoder_monoTrans(ZCurveEncoderObject *self, PyObject *ar
 
     monoTrans(self->cppStr, self->len, params, freq, local);
 
-    return toList(params, 3);
+    return toNumpyArray(params, 3);
 }
 /* ZCurveEncoder.dinucl_transform */
 /*
@@ -675,7 +727,7 @@ static PyObject *ZCurveEncoder_monoTrans(ZCurveEncoderObject *self, PyObject *ar
  */
 static PyObject *ZCurveEncoder_diTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
-    float params[12];
+    float *params = new float[12]();
     bool freq = false;
     bool local = false;
 
@@ -686,7 +738,7 @@ static PyObject *ZCurveEncoder_diTrans(ZCurveEncoderObject *self, PyObject *args
     
     diTrans(self->cppStr, self->len, params, freq, local);
 
-    return toList(params, 12);
+    return toNumpyArray(params, 12);
 }
 /* ZCurveEncoder.trinucl_transform */
 /*
@@ -694,7 +746,7 @@ static PyObject *ZCurveEncoder_diTrans(ZCurveEncoderObject *self, PyObject *args
  */
 static PyObject *ZCurveEncoder_triTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
-    float params[48];
+    float *params = new float[48]();
     bool freq = false;
     bool local = false;
     
@@ -705,7 +757,7 @@ static PyObject *ZCurveEncoder_triTrans(ZCurveEncoderObject *self, PyObject *arg
     
     triTrans(self->cppStr, self->len, params, freq, local);
 
-    return toList(params, 48);
+    return toNumpyArray(params, 48);
 }
 /* ZCurveEncoder.mononucl_phase_transform */
 /*
@@ -720,14 +772,14 @@ static PyObject *ZCurveEncoder_monoPhaseTrans(ZCurveEncoderObject *self, PyObjec
     if (!PyArg_ParseTupleAndKeywords(args, kw, "|ibb", kwListPhaseTrans, &phase, &freq, &local))
         Py_RETURN_NONE;
 
-    float params[6 * 3];
+    float *params = new float[6 * 3]();
 
     if (phase <= 0) phase = 1;
     if (local) freq = true;
     
     monoPhaseTrans(self->cppStr, self->len, params, phase, freq, local);
 
-    return toList(params, 3 * phase);
+    return toNumpyArray(params, 3 * phase);
 }
 /* ZCurveEncoder.dinucl_phase_transform */
 /*
@@ -742,14 +794,14 @@ static PyObject *ZCurveEncoder_diPhaseTrans(ZCurveEncoderObject *self, PyObject 
     if (!PyArg_ParseTupleAndKeywords(args, kw, "|ibb", kwListPhaseTrans, &phase, &freq, &local))
         Py_RETURN_NONE;
     
-    float params[6 * 12];
+    float *params = new float[6 * 12]();
 
     if (phase <= 0) phase = 1;
     if (local) freq = true;
 
     diPhaseTrans(self->cppStr, self->len, params, phase, freq, local);
     
-    return toList(params, phase * 12);
+    return toNumpyArray(params, phase * 12);
 }
 /* ZCurveEncoder.trinucl_phase_transform */
 /*
@@ -764,14 +816,14 @@ static PyObject *ZCurveEncoder_triPhaseTrans(ZCurveEncoderObject *self, PyObject
     if (!PyArg_ParseTupleAndKeywords(args, kw, "|ibb", kwListPhaseTrans, &phase, &freq, &local))
         Py_RETURN_NONE;
     
-    float params[6 * 48];
+    float *params = new float[6 * 48]();
 
     if (phase <= 0) phase = 1;
     if (local) freq = true;
 
     triPhaseTrans(self->cppStr, self->len, params, phase, freq, local);
 
-    return toList(params, phase * 48);
+    return toNumpyArray(params, phase * 48);
 }
 /* ZCurveEncoder.k_nucl_phase_transform */
 /*
@@ -789,17 +841,13 @@ static PyObject *ZCurveEncoder_kPhaseTrans(ZCurveEncoderObject *self, PyObject *
         Py_RETURN_NONE;
 
     for (i = 0, k = 1; i < n - 1; i ++) k *= 4;
-    float *params = new float[phase * k * 3];
+    float *params = new float[phase * k * 3]();
     
     if (phase <= 0) phase = 1;
     if (local) freq = true;
 
     kPhaseTrans(self->cppStr, self->len, params, n, phase, freq, local);
-    PyObject *retr = toList(params, 3 * phase * k);
-
-    delete[] params;
-
-    return retr;
+    return toNumpyArray(params, 3 * phase * k);
 }
 
 /* ZCurveEncoder's Member Methods */
@@ -958,25 +1006,13 @@ ZCurvePlotter_zCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
 
     // If should return n, a list of arithmetic progression will be created
     if (back) {
-        PyObject *vec = PyList_New(len);
-
-        for (j = 0; j < len; j ++) {
-            PyObject *value = Py_BuildValue("i", j);
-            PyList_SET_ITEM(vec, j, value);
-        }
-            
+        PyObject *vec = genNumpyArange(len);
         PyList_Append(paramList, vec);
         Py_DECREF(vec);
     }
 
     for (i = 0; i < 3; i ++) {
-        PyObject *vec = PyList_New(len);
-            
-        for (j = 0; j < len; j ++) {
-            PyObject *value = Py_BuildValue("f", params[i][j]);
-            PyList_SET_ITEM(vec, j, value);
-        }
-
+        PyObject *vec = toNumpyArray(params[i], len);
         PyList_Append(paramList, vec);  // PyList_Append will create a new reference
         Py_DECREF(vec);
     }
@@ -1758,18 +1794,10 @@ static PyObject *BatchZCurveEncoder_call(BatchZCurveEncoderObject *self, PyObjec
             head += self->nParamList[k];
         }
     }
-
-    PyObject *retr = PyList_New(count);
+    
+    PyObject *retr = convertToNumpy(paramList, count, finalNParams);
 
     for (int i = 0; i < count; i ++) {
-        PyObject *item = PyList_New(finalNParams);
-
-        for (int j = 0; j < finalNParams; j ++) {
-            PyObject *value = Py_BuildValue("f", paramList[i][j]);
-            PyList_SET_ITEM(item, j, value);
-        }
-
-        PyList_SET_ITEM(retr, i, item);
         Py_XDECREF(pySeqs.at(i));
         delete[] paramList[i];
     }

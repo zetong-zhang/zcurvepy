@@ -52,7 +52,7 @@ def handleInputs2D(
                 window = int(setting['window']) if 'window' in setting.keys() else 0
                 retrs = methodcaller(types[typ], window=window, return_n=False)(plotter)
                 yvalues = retrs[0] if isinstance(retrs, tuple) else retrs
-                curves.append((np.array(yvalues, dtype=np.float64), typ))
+                curves.append(yvalues, typ)
                 
             curve_list.append((record.id, curves, intv, len(record)))
     

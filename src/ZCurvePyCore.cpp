@@ -1,5 +1,4 @@
 #include"ZCurvePyCore.h"
-
 /* 
  * Map for converting ASCII chars into one-hot vectors
  *
@@ -702,49 +701,59 @@ void kPhaseTrans(char *seq, int len, float *params, int k, int phase, bool norml
     if (k < 7) {
         (*PhaseTrans[k - 1])(seq, len, params, phase, norml, local);
     } else {
-        /* Experimental function */
-        /* Don't set k >= 7 in actual use */
         float phaseCount[6] = {0};
         int base = (len - k + 1) / phase, residue = (len - k + 1) % phase;
-        int i, j, m, num, p;
-        float denom;
+        float weight;
+        int i;
 
         for (i = 0; i < phase; i ++)
             phaseCount[i] += base;
 
         for (i = 0; i < residue; i ++)
             phaseCount[i] ++;
+        
+        int num;
 
-        for (i = 0, num = 1; i < k; i ++) num *= 4;
+        for (i = 0, num = 1; i < k - 1; i ++) num *= 4;
+        int size = num * 4;
 
-        float *counts[6], weight;
+        float *counts[6];
 
         for (i = 0; i < phase; i ++)
-            counts[i] = new float[num]();
+            counts[i] = new float[size]();
+        
+        int j, l;
 
         for (i = 0; i < len - k + 1; i ++) {
-            p = i % phase;
-            for (k = 0; k < num; k ++) {
-                for (j = 0, m = k, weight = 1.0; j < k; j ++, m /= 4)
-                    weight *= ONE_HOT[seq[i + k - j - 1]][m % 4];
-            
-                counts[p][k] += weight;
+            int p = i % phase;
+            for (l = 0; l < num; l ++) {
+                weight = 1.0F;
+                int m = l;
+                for (j = 0; j < k - 1; j ++) {
+                    weight *= ONE_HOT[seq[i + j]][m % 4];
+                    m /= 4;
+                }
+                m = l * 4;
+                counts[p][m + X] = weight * Z_HOT[seq[i + j]][X];
+                counts[p][m + Y] = weight * Z_HOT[seq[i + j]][Y];
+                counts[p][m + Z] = weight * Z_HOT[seq[i + j]][Z];
+                counts[p][m + L] = weight;
             }
         }
 
         for (i = 0; i < phase; i ++)
             for (j = 0; j < num; j += 4, params += 3) {
-                params[X] = counts[i][j + 0] + counts[i][j + 1] - counts[i][j + 2] - counts[i][j + 3];
-                params[Y] = counts[i][j + 0] + counts[i][j + 2] - counts[i][j + 1] - counts[i][j + 3];
-                params[Z] = counts[i][j + 0] + counts[i][j + 3] - counts[i][j + 2] - counts[i][j + 1];
+                params[X] = counts[i][j + X];
+                params[Y] = counts[i][j + Y];
+                params[Z] = counts[i][j + Z];
 
                 if (norml) {
-                    denom = local ? (counts[i][j + 0] + counts[i][j + 1] + counts[i][j + 2] + counts[i][j + 3]) : phaseCount[i];
+                    weight = local ? counts[i][j + L] : phaseCount[i];
 
-                    if (denom > 0) {
-                        params[X] /= denom;
-                        params[Y] /= denom;
-                        params[Z] /= denom;
+                    if (weight > 0) {
+                        params[X] /= weight;
+                        params[Y] /= weight;
+                        params[Z] /= weight;
                     }
                 }
             }

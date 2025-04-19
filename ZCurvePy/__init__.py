@@ -1,4 +1,4 @@
-__version__ = '1.5.10'
+__version__ = '1.5.11'
 __upgrade__ = '2025-03-10'
 f"""
     ZCurvePy -- High performance Python toolkit for the Z-curve theory!

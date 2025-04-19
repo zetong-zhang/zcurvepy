@@ -1,9 +1,9 @@
-# ZCurvePy (Lastest version 1.5.10)
+# ZCurvePy (Lastest version 1.5.11)
 *A high performance Python toolkit for the Z-curve theory developed by **T**ianjin **U**niversity **B**io**I**nformatics **C**enter (**TUBIC**)*
 
 ## Note:  
 This page only provides a brief description of the software.  
-For more information, please visit our full API and help documentation on [this website](https://zcurvepy-docs.readthedocs.io).
+For more information, please visit our full API and help documentation on [this website](https://zcurvehub-docs.readthedocs.io).
 
 ## Contents
 - [Overview](#title1)
@@ -72,6 +72,10 @@ python -m pip install zcurvepy
 python -m pip install --upgrade zcurvepy
 
 python -m pip uninstall zcurvepy
+```
+Starting from 1.5.11, the return value types of some frequently used API functions have been modified from Python list to Numpy ndarray. Therefore, please install Numpy 1.x before compiling and installing.
+```bash
+python -m pip install numpy>=1.21,<2.0
 ```
 ### Python Requirements <a id="subtitle3"></a>
 Python 3.7, 3.8, 3.9, 3.10 and 3.11 are supported. We currently recommend using Python 3.9.6 (https://www.python.org/downloads/release/python-396/)
@@ -222,7 +226,7 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
     ```
     Commandline usage:
     ```bash
-    zcurve-segmenter -a CP001956.1 -m WS -l 50000 -o seg_points.csv -s True
+    zcurve-segmenter -a CP001956.1 -m WS -l 50000 -o seg_points.csv -v True
     ```
 4. Build a simple gene recognizer <a id="section4"></a>
     This is an example of training a gene recognition model for *Escherichia coli* :
@@ -243,7 +247,7 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
     results = builder.predict(records)
     ```
 ## Web Server <a id="title4"></a>
-A free, flexible and interactive **ZCurvePy Web Server** is coming soon at https://tubic.tju.edu.cn/zcurvepy .
+A free, flexible and interactive **ZCurveHub Web Service** is available at https://tubic.tju.edu.cn/zcurve/ .
 ## Reference <a id="title5"></a>
 [1] &nbsp; Guo FB, Ou HY, Zhang CT. ZCURVE: a new system for recognizing protein-coding genes in bacterial and archaeal genomes. Nucleic Acids Res. 2003 Mar 15;31(6):1780-9. doi: 10.1093/nar/gkg254. [[Pubmed]](https://pubmed.ncbi.nlm.nih.gov/12626720/)  
 [2] &nbsp; Zhang CT, Zhang R. A nucleotide composition constraint of genome sequences. Comput Biol Chem. 2004 Apr;28(2):149-53. doi: 10.1016/j.compbiolchem.2004.02.002. [[Pubmed]](https://pubmed.ncbi.nlm.nih.gov/15130543/)  
@@ -256,7 +260,7 @@ A free, flexible and interactive **ZCurvePy Web Server** is coming soon at https
 [9] Yin ZN, Lai FL, Gao F. Unveiling human origins of replication using deep learning: accurate prediction and comprehensive analysis. Brief Bioinform. 2023 Nov 22;25(1):bbad432. doi: 10.1093/bib/bbad432.  [[Pubmed]](https://pubmed.ncbi.nlm.nih.gov/38008420/)  
 [10] Geng YQ, Lai FL, Luo H, Gao F. Nmix: a hybrid deep learning model for precise prediction of 2'-O-methylation sites based on multi-feature fusion and ensemble learning. Brief Bioinform. 2024 Sep 23;25(6):bbae601. doi: 10.1093/bib/bbae601. [[Pubmed]](https://pubmed.ncbi.nlm.nih.gov/39550226/) 
 
-## Citing <a id="title6"></a>
+## Citation <a id="title6"></a>
 The paper on this work has not yet been published. If you would like to cite this software in your work, please contact us to discuss alternatives.
 
 ## Contact <a id="title7"></a>

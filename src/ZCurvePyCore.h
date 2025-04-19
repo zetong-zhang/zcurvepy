@@ -4,7 +4,7 @@
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2024-12-09            *
- *  @version     1.5.10                *
+ *  @version     1.5.11                *
  * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ZCURVEPY_CORE

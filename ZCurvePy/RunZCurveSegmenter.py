@@ -43,6 +43,8 @@ Tips: Use the Z-curve method more flexibly through our ZCurvePy's APIs!
 arg_fasta = "    input sequence file as FASTA format (*.fa; *.fasta; *.fna)"
 arg_gbk   = "    input sequence file as GenBank format (*.gb; *.genbank; *.gbk; *.gbff)"
 arg_acc   = "    input sequence file as NCBI accession number (*.txt)"
+arg_start = "    start point of the subsequence to be segmented. (Default: 0)"
+arg_end   = "    end point of the subsequence to be segmented. (Default: [Sequence Length])"
 arg_mode  = "    choose the mode of Z-curve Segmenter based on S(P) (Default: 'GN')"
 arg_halt  = "    halting parameter for the segmenting recursion (Default: 100)"
 arg_min   = "    the min length between two segmentation point (Default: 3000 bp)"
@@ -103,6 +105,7 @@ def handleInputs(
 def visualize(
     record,
     mode,
+    plot_range,
     seg_points,
     show=False,
     save=None
@@ -118,8 +121,10 @@ def visualize(
     ax.set_ylabel("Component", labelpad=10)
 
     for typ, name in types[mode]:
-        results = methodcaller(typ)(plotter)
-        ax.plot(results[0][::intv], results[1][::intv], label=name)
+        results = methodcaller(typ, return_n=False)(plotter)
+        if "prime" in typ:
+            results = results[0]
+        ax.plot(plot_range[::intv], results[::intv], label=name)
     for point, _ in seg_points:
         ax.axvline(point, color='red')
     ax.legend()
@@ -150,33 +155,42 @@ def main():
     parser.add_argument('-f', '--fasta', metavar='\b', required=False, type=str, default=None, help=arg_fasta)
     parser.add_argument('-g', '--genbank', metavar='\b', required=False, type=str, default=None, help=arg_gbk)
     parser.add_argument('-a', '--accession', metavar='\b', required=False, type=str, default=None, help=arg_acc)
+    parser.add_argument('-s', '--start', metavar='\b', required=False, type=int, default=0, help=arg_start)
+    parser.add_argument('-e', '--end', metavar='\b', required=False, type=int, default=-1, help=arg_end)
     parser.add_argument('-m', '--mode', metavar='\b', required=True, type=str, default='GN', help=arg_mode)
     parser.add_argument('-t', '--halting', metavar='\b', required=False, type=float, default=100, help=arg_halt)
     parser.add_argument('-l', '--minlen', metavar='\b', required=False, type=int, default=3000, help=arg_min)
     parser.add_argument('-d', '--maxdepth', metavar='\b', required=False, type=int, default=9999, help=arg_depth)
     parser.add_argument('-o', '--output', metavar='\b', required=True, type=str, help=arg_out)
     parser.add_argument('-p', '--png', metavar='\b', required=False, default=None, type=str, help=arg_png)
-    parser.add_argument('-s', '--show', metavar='\b', required=False, type=bool, default=False, help=arg_show)
+    parser.add_argument('-v', '--show', metavar='\b', required=False, type=bool, default=False, help=arg_show)
     args = vars(parser.parse_args())
 
     record = handleInputs(args['fasta'], args['genbank'], args['accession'])
+    length, start, end = len(record), args['start'], args['end']
+    end = length if end < 0 else end
+    
     mode, halting, minlen, maxdepth = args['mode'], int(args['halting']), int(args['minlen']), args['maxdepth']
 
+    plot_range = list(range(start - length, 0)) + list(range(0, end)) if start > end else list(range(start, end))
+    record = record[start:] + record[:end] if start > end else record[start:end]
+    
     if mode not in ZCurveSegmenter.func.keys():
         print(f"{command_name}: [error] unknown mode '{mode}'. ")
         sys.exit()
     
     segmenter = ZCurveSegmenter(mode=mode, halting=halting, min_len=minlen, max_depth=maxdepth)
     seg_points = segmenter.run(record)
+    real_locs = [[plot_range[i], v] for i, v in seg_points]
 
     with open(args['output'], "w") as output:
         output.write("No,Seg_Point,dS_Value\n")
-        for i, (point, value) in enumerate(seg_points):
+        for i, (point, value) in enumerate(real_locs):
             output.write(f"{i + 1},{point},{round(value, 2)}\n")
     
     png, show = args['png'], args['show']
 
     if png is not None or show:
-        visualize(record, mode, seg_points, show, png)
+        visualize(record, mode, plot_range, real_locs, show, png)
     
     print(f"Successfully segmented at {len(seg_points)} points on the genome.")

@@ -4,7 +4,7 @@
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2025-02-25            *
- *  @version     1.5.10                *
+ *  @version     1.5.11                *
  * * * * * * * * * * * * * * * * * * * */
 
 // Supported Python Version: >= 3.9
@@ -19,7 +19,8 @@
 #include<algorithm>
 #include<cstdio>
 
-#include"Python.h"
+#include<Python.h>
+#include<numpy/arrayobject.h>
 #include"ZCurvePyCore.h"
 
 /* Keyword 'k' for ZCurvePy.BatchZCurveEncoder */
