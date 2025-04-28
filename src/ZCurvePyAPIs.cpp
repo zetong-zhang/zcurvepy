@@ -1,4 +1,15 @@
+/* * * * * * * * * * * * * * * * * * * *
+ *  ZCurvePy Source Code               *
+ *                                     *
+ *  @author      Zhang ZT, Gao F       *
+ *  @copyright   Copyright 2025 TUBIC  *
+ *  @date        2025-02-25            *
+ *  @version     1.5.12                *
+ * * * * * * * * * * * * * * * * * * * */
+
 #include"ZCurvePyAPIs.h"
+
+// Extern variables from ZCurvePyAPIs.h
 
 PyObject *keyK = nullptr;
 PyObject *keyPhase = nullptr;
@@ -32,23 +43,32 @@ static char *kwListCurve[] = {"window", "return_n", NULL};
 /*
  * @param window   : sliding window size for doing mean smoothing
  * @param return_n : should return the x-values of 2D-curve or not
- * @param only_m : only return max point location
+ * @param only_m   : only return max point location
  */
 static char *kwListdSCurve[] = {"window", "return_n", "only_m", NULL};
 /* Modes for BatchZCurvePlotter */
+/* 
+ * @param accum   : cumlulative curves
+ * @param profile : fitted curves
+ * @param tetra   : no accumulations
+ */
 static char *plotterMode[] = {"accum", "profile", "tetra"};
 /* 
- * Convert C++ float array to Numpy array.
- *
- * @param params  array to be converted to list
- * @param len     length of the array
- * @return        Python list object
+ * One-dimensional float array memory destruction function based on Python Capsule.
+ * 
+ * @param capsule : PyCapsule created for one-dimensional NumPy arrays.
  */
-
 static void deleteFloatArray(PyObject *capsule) {
     float *array = static_cast<float*>(PyCapsule_GetPointer(capsule, "float_arr"));
     delete[] array;
 }
+/* 
+ * Convert C++ float array to Numpy array.
+ *
+ * @param params array to be converted to list
+ * @param len     length of the array
+ * @return        Python list object
+ */
 static PyObject *toNumpyArray(float *params, int len) {
     import_array();
     /* PASS 2025-04-17 */
@@ -76,10 +96,21 @@ static PyObject *toNumpyArray(float *params, int len) {
     
     return np_array;
 }
+/* 
+ * One-dimensional int array memory destruction function based on Python Capsule.
+ * 
+ * @param capsule : PyCapsule created for one-dimensional NumPy arrays.
+ */
 static void deleteIntArray(PyObject *capsule) {
     float *array = static_cast<float*>(PyCapsule_GetPointer(capsule, "int_arr"));
     delete[] array;
 }
+
+/* 
+ * Create an arithmetic sequence with the interval of [0, len) 
+ * 
+ * @param len : the end point of the interval of an arithmetic sequence
+ */
 static PyObject *genNumpyArange(int len) {
     import_array();
     int *int_arr = new int[len];
@@ -110,7 +141,13 @@ static PyObject *genNumpyArange(int len) {
     
     return np_array;
 }
-
+/* 
+ * Convert the two-dimensional array into a NumPy matrix. (Row-priority array)
+ * 
+ * @param paramList : two-dimensional float array
+ * @param rows      : number of rows
+ * @param cols      : number of columns
+ */
 static PyObject* convertToNumpy(float** paramList, int rows, int cols) {
     import_array();
     npy_intp dims[2] = {rows, cols};
@@ -1500,6 +1537,34 @@ ZCurvePlotter_CpGdeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject
     
     return retr;
 }
+/* ZCurvePlotter.AT_skew */
+static PyObject *
+ZCurvePlotter_ATSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+    int len = self->len, window = 100;
+    bool back = true;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "|ib", kwListCurve, &window, &back))
+        Py_RETURN_NONE;
+
+    if (window < 50) window = 50;
+    float *params = new float[len];
+    ATSkew(self->cppStr, len, window, params);
+    return toCurve(params, len, back);
+}
+/* ZCurvePlotter.GC_skew */
+static PyObject *
+ZCurvePlotter_GCSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+    int len = self->len, window = 100;
+    bool back = true;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "|ib", kwListCurve, &window, &back))
+        Py_RETURN_NONE;
+
+    if (window < 50) window = 50;
+    float *params = new float[len];
+    GCSkew(self->cppStr, len, window, params);
+    return toCurve(params, len, back);
+}
 /* ZCurvePlotter methods */
 static PyMethodDef ZCurvePlotter_methods[] = {
     {"z_curve", (PyCFunction) ZCurvePlotter_zCurve, METH_VARARGS|METH_KEYWORDS, NULL},
@@ -1508,6 +1573,8 @@ static PyMethodDef ZCurvePlotter_methods[] = {
     {"WS_disparity", (PyCFunction) ZCurvePlotter_WSDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
     {"AT_disparity", (PyCFunction) ZCurvePlotter_ATDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
     {"GC_disparity", (PyCFunction) ZCurvePlotter_GCDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_skew", (PyCFunction) ZCurvePlotter_ATSkew, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_skew", (PyCFunction) ZCurvePlotter_GCSkew, METH_VARARGS|METH_KEYWORDS, NULL},
     {"x_prime_curve", (PyCFunction) ZCurvePlotter_xPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
     {"y_prime_curve", (PyCFunction) ZCurvePlotter_yPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
     {"z_prime_curve", (PyCFunction) ZCurvePlotter_zPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},

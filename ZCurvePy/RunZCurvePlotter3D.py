@@ -27,7 +27,9 @@ names = {
     "ZP" : "z' curve",
     "AP" : "AT' curve",
     "GP" : "GC' curve",
-    "CG" : "CpG' curve"
+    "CG" : "CpG' curve",
+    "AS" : "AT skew",
+    "GS" : "GC skew"
 }
 
 prog_infor = \
@@ -105,7 +107,9 @@ types = {
     "ZP"  : "z_prime_curve",
     "AP"  : "AT_prime_curve",
     "GP"  : "GC_prime_curve",
-    "CG"  : "CpG_prime_curve"
+    "CG"  : "CpG_prime_curve",
+    "AS"  : "AT_skew",
+    "GS"  : "GC_skew"
 }
 
 def checkInputs(args: dict, command_name: str):

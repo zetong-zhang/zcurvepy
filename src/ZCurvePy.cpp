@@ -4,7 +4,7 @@
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2025-02-25            *
- *  @version     1.5.11                *
+ *  @version     1.5.12                *
  * * * * * * * * * * * * * * * * * * * */
 #include "ZCurvePyCore.h"
 #include "ZCurvePyAPIs.h"

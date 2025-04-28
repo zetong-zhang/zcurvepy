@@ -14,12 +14,15 @@ f"""
 """
 import os
 import sys
-from subprocess import run
-from Bio.SeqIO import parse
+from Bio.SeqIO import parse, read, write
 from Bio.SeqRecord import SeqRecord
+from Bio import Entrez
+
+Entrez.email = "flypigaround@163.com"
+Entrez.api_key = "24a9ecda42217cd6d8f24058a4d6df456c09"
 
 # where the downloaded files saved
-CACHE_PATH = "ncbi_acc_download"
+CACHE_PATH = "ncbi_cache"
 
 def download_acc(acc, command_name=__name__, form='fasta'):
     """
@@ -56,18 +59,22 @@ def download_acc(acc, command_name=__name__, form='fasta'):
         if len(item) == 0:
             continue
             
-        temp_path = item + '.fa' if form == 'fasta' else '.gbk'
-        save_path = os.path.join(CACHE_PATH, temp_path)
+        file_name = item + '.fa' if form == 'fasta' else '.gbk'
+        save_path = os.path.join(CACHE_PATH, file_name)
 
         if not os.path.exists(save_path):
-            run(f"ncbi-acc-download -F {form} {item}")
-            if os.path.exists(temp_path):
-                os.replace(temp_path, save_path)
-                print(f'ncbi-acc-download: [infor] downloaded {save_path}')
-            
-        if not os.path.exists(save_path):
-            print(f"{command_name}: [error] ncbi-acc-download failed to download {item}. ")
-            sys.exit(0)
+            try:
+                handle = Entrez.efetch(
+                    db="nucleotide",
+                    id=item,
+                    rettype=form,
+                    retmode="text")
+                record = read(handle, form)
+                handle.close()
+                write(record, save_path, form)
+            except Exception as e:
+                print(f"{command_name}:{e}")
+                sys.exit(0)
 
         ready.append(save_path)
     return ready

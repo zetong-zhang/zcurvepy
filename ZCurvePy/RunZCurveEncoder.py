@@ -85,7 +85,7 @@ def mergeInputs(
         
         # read accesions
         if accession is not None:
-            form = 'genbank' if extract else 'fasta'
+            form = 'gb' if extract else 'fasta'
             single_records = download_acc(accession, command_name, form)
             for single_record in single_records:
                 if extract:

@@ -1325,6 +1325,65 @@ void tetrahedron(char *seq, int len, float **params) {
             params[i][j] = Z_HOT[seq[j]][i];
 }
 
+void ATSkew(char *seq, int len, int window, float *params) {
+    float countA = 0.0F, countT = 0.0F;
+    int half = (int) (window / 2);
+
+    int i;
+    for (i = 0; i < half - 1; i ++) {
+        countA += AT_HOT[seq[i]][0];
+        countT += AT_HOT[seq[i]][1];
+    }
+
+    int s, e;
+    for (i = 0; i < len; i ++) {
+        s = (i - half) > 0 ? (i - half) : 0;
+        e = (i + half - 1) < len ? (i + half - 1) : len;
+
+        if (s > 0) {
+            countA -= AT_HOT[seq[s - 1]][0];
+            countT -= AT_HOT[seq[s - 1]][1];
+        }
+
+        if (e < len) {
+            countA += AT_HOT[seq[e]][0];
+            countT += AT_HOT[seq[e]][1];
+        }
+
+        float sum = countA + countT;
+        params[i] = sum == 0.0F ? 0.0F : ((countA - countT) / sum);
+    }
+}
+
+void GCSkew(char *seq, int len, int window, float *params) {
+    float countG = 0.0F, countC = 0.0F;
+    int half = (int) (window / 2);
+
+    int i;
+    for (i = 0; i < half - 1; i ++) {
+        countG += GC_HOT[seq[i]][0];
+        countC += GC_HOT[seq[i]][1];
+    }
+
+    int s, e;
+    for (i = 0; i < len; i ++) {
+        s = (i - half) > 0 ? (i - half) : 0;
+        e = (i + half - 1) < len ? (i + half - 1) : len;
+
+        if (s > 0) {
+            countG -= GC_HOT[seq[s - 1]][0];
+            countC -= GC_HOT[seq[s - 1]][1];
+        }
+
+        if (e < len) {
+            countG += GC_HOT[seq[e]][0];
+            countC += GC_HOT[seq[e]][1];
+        }
+        
+        float sum = countG + countC;
+        params[i] = sum == 0.0F ? 0.0F : ((countG - countC) / sum);
+    }
+}
 
 #ifdef __cplusplus
 }

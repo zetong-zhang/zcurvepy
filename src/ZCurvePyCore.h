@@ -4,7 +4,7 @@
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2024-12-09            *
- *  @version     1.5.11                *
+ *  @version     1.5.12                *
  * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ZCURVEPY_CORE
@@ -112,6 +112,11 @@ int gcDeltaSTrans(char *, int, float *, int, float &);
 int CpGDeltaSTrans(char *, int, float *, int, float &);
 /* Do tetrahedron Transform */
 void tetrahedron(char *, int, float **);
+
+/* Calculate sliding window AT-skew */
+void ATSkew(char *, int, int, float *);
+/* Calculate sliding window GC-skew */
+void GCSkew(char *, int, int, float *);
 
 #ifdef __cplusplus
 }

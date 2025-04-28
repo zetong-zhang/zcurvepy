@@ -23,7 +23,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords=['Bioinformatics', 'Z-curve', 'Machine Learning'],
     license=license,
-    version='1.5.11',
+    version='1.5.12',
     install_requires=requirements,
     python_requires='>=3.7, <=3.11',
     packages=find_packages(),
