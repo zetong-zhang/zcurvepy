@@ -2,6 +2,8 @@
 
 *A high performance Python toolkit for the Z-curve theory developed by **T**ianjin **U**niversity **B**io**I**nformatics **C**enter (**TUBIC**)*  
 
+![ZCurvePy LOGO](./logo.png)
+
 ## Note:  
 This page only provides a brief description of the software.  
 For more information, please visit our full API and help documentation on [this website](https://zcurvehub-docs.readthedocs.io).
