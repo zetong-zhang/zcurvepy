@@ -1054,8 +1054,6 @@ ZCurvePlotter_zCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
         Py_DECREF(vec);
     }
 
-    for (i = 0; i < 3; i ++) delete[] params[i];
-
     return paramList;
 }
 /* ZCurvePlotter.RY_disparity */
