@@ -1,6 +1,6 @@
-from ZCurvePy import __version__
+from ZcurvePy import __version__
 f"""
-    This is the util module for runnable scripts of ZCurvePy
+    This is the util module of ZcurvePy
 
     We are happy to see that the APIs provided here are also
     useful for your project, so you can just use it in your
@@ -59,7 +59,7 @@ def download_acc(acc, command_name=__name__, form='fasta'):
         if len(item) == 0:
             continue
             
-        file_name = item + '.fa' if form == 'fasta' else '.gbk'
+        file_name = item + ('.fa' if form == 'fasta' else '.gbk')
         save_path = os.path.join(CACHE_PATH, file_name)
 
         if not os.path.exists(save_path):
@@ -96,13 +96,7 @@ def extract_CDS(genome):
         for feature in record.features:
             if feature.type == "CDS":
                 name = feature.qualifiers['locus_tag'][0]
-                start = feature.location.start
-                end = feature.location.end
-                CDS_seq = record.seq[start:end]
-
-                if feature.location.strand == -1:
-                    CDS_seq = CDS_seq.reverse_complement()
-
+                CDS_seq = feature.extract(record.seq)
                 CDS_record = SeqRecord(CDS_seq, id=name)
                 CDSs.append(CDS_record)
     

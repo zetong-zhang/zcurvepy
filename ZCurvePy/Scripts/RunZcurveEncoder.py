@@ -1,8 +1,8 @@
 """ This is the main program of Z-curve Encoder """
 # PASS 2025-03-03
-from _ZCurvePy import BatchZCurveEncoder
-from ZCurvePy import __version__
-from ZCurvePy.RunnableScriptsUtil import download_acc, extract_CDS
+from _ZcurvePy import BatchZcurveEncoder
+from ZcurvePy import __version__
+from ZcurvePy.Util import download_acc, extract_CDS
 from Bio.SeqIO import parse
 import argparse
 import json
@@ -27,18 +27,18 @@ The content of setting file should be like:
 
 {
     "encoder": {
-        // Corresponds to 'hyper_params' of ZCurveEncoder.__init__
+        // Corresponds to 'hyper_params' of ZcurveEncoder.__init__
         "hyper_params": [
             {"k": 1, "phase": 3, "freq": true, "local": true},
             {"k": 2, "phase": 3, "freq": true, "local": true},
             {"k": 3, "phase": 3, "freq": true, "local": true}
         ],
-        // Corresponds to 'n_jobs' of ZCurveEncoder.__init__ */
+        // Corresponds to 'n_jobs' of ZcurveEncoder.__init__ */
         "n_jobs": 8
     }
 }
 
-Tips: Use the Z-curve method more flexibly through our ZCurvePy's APIs! 
+Tips: Use the Z-curve method more flexibly through our ZcurvePy's APIs! 
 """
 
 # help information
@@ -143,7 +143,7 @@ def main():
         sys.exit()
     
     n_jobs = int(setting['n_jobs']) if 'n_jobs' in setting.keys() else -1
-    encoder = BatchZCurveEncoder(hyper_params=setting['hyper_params'], n_jobs=n_jobs)
+    encoder = BatchZcurveEncoder(hyper_params=setting['hyper_params'], n_jobs=n_jobs)
 
     # run coding process
     output_file = args['output']

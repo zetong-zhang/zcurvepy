@@ -1,4 +1,4 @@
-from ZCurvePy.RunZCurvePlotter3D import *
+from ZcurvePy.Scripts.RunZcurvePlotter3D import *
 
 def handleInputs2D(
     records: list, 
@@ -43,7 +43,7 @@ def handleInputs2D(
                 sys.exit()
             
             curves = []
-            plotter = ZCurvePlotter(record)
+            plotter = ZcurvePlotter(record)
 
             for typ in curve_types:
                 if typ not in types.keys():
@@ -52,7 +52,7 @@ def handleInputs2D(
                 window = int(setting['window']) if 'window' in setting.keys() else 0
                 retrs = methodcaller(types[typ], window=window, return_n=False)(plotter)
                 yvalues = retrs[0] if isinstance(retrs, tuple) else retrs
-                curves.append(yvalues, typ)
+                curves.append((yvalues, typ))
                 
             curve_list.append((record.id, curves, intv, len(record)))
     
@@ -83,7 +83,7 @@ def visualize2D(curve_list: list, png: str, show: bool):
         try:
             manager = plt.get_current_fig_manager()
             fig.canvas.manager.set_window_title("Z-curve Plotter (Powered by Matplotlib)")
-            res_path = pkg_resources.resource_filename("ZCurvePy", "assets/image/icon.ico")
+            res_path = pkg_resources.resource_filename("ZcurvePy", "assets/image/icon.ico")
             manager.window.iconbitmap(res_path)
             plt.show()
         except Exception as exception:

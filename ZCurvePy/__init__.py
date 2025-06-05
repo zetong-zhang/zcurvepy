@@ -1,15 +1,15 @@
-__version__ = '1.5.12'
-__upgrade__ = '2025-03-10'
+__version__ = '1.6.0'
+__upgrade__ = '2025-04-29'
 f"""
-    ZCurvePy -- High performance Python toolkit for the Z-curve theory!
+    ZcurvePy -- High performance Python toolkit for the Z-curve theory!
 
-    This is the Python package init module of ZCurvePy v{__version__} released.
+    This is the Python package init module of ZcurvePy v{__version__} released.
 
     All the C/C++ apis can be called through this module. If you don't
     want to import additional third-party module (such as modules from
-    scikit-learn) or APIs written in pure Python provided by ZCurvePy,
-    (such as ZCurveBuilder), use 'import _ZCurvePy' instead of 'import
-    ZCurvePy).
+    scikit-learn) or APIs written in pure Python provided by ZcurvePy,
+    (such as ZcurveBuilder), use 'import _ZcurvePy' instead of 'import
+    ZcurvePy).
 
     Authors:    Zetong Zhang, Feng Gao
     Copyright:  Copyright 2025 TUBIC
@@ -37,7 +37,7 @@ f"""
         2021, 372(6541): 512-516.)
 """
 import sys
-# Up regulate max recursion for ZCurveSegmenter
+# Up regulate max recursion for ZcurveSegmenter
 sys.setrecursionlimit(10000)
 from operator import methodcaller
 from copy import deepcopy
@@ -47,17 +47,17 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 # Numpy Support
 import numpy as np
 
-# ZCurvePy C/C++ APIs (Classes)
-from _ZCurvePy import ZCurveEncoder
-from _ZCurvePy import ZCurvePlotter
-# ZCurvePy C/C++ APIs (Multi-thread)
-from _ZCurvePy import BatchZCurveEncoder
-from _ZCurvePy import BatchZCurvePlotter
-# ZCurvePy C/C++ APIs (Method)
-from _ZCurvePy import shuffle
-from _ZCurvePy import decode
+# ZcurvePy C/C++ APIs (Classes)
+from _ZcurvePy import ZcurveEncoder
+from _ZcurvePy import ZcurvePlotter
+# ZcurvePy C/C++ APIs (Multi-thread)
+from _ZcurvePy import BatchZcurveEncoder
+from _ZcurvePy import BatchZcurvePlotter
+# ZcurvePy C/C++ APIs (Method)
+from _ZcurvePy import shuffle
+from _ZcurvePy import decode
 
-class ZCurveBuilder:
+class ZcurveBuilder:
     """
     A simple API for building gene recognizer. It includes basic modules such 
     as feature extraction, preprocessing, negative sampling and model training.
@@ -67,7 +67,7 @@ class ZCurveBuilder:
         encoder (Callable):  
             A function or object that can be called with a list of supported 
             sequences and returns a feature matrix of the data set. Default 
-            is a BatchZCurveEncoder object that yields 189-dim features.
+            is a BatchZcurveEncoder object that yields 189-dim features.
 
         model (object):  
             A machine learning model object that have `fit` and `predict_proba`
@@ -88,7 +88,7 @@ class ZCurveBuilder:
             The ratio between negative samples and positive samples, decides 
             how many negative sequences should be obtained from each positive 
             case sequence.  
-            Parameter for `ZCurveBuilder.shuffle`, default is 5.
+            Parameter for `ZcurveBuilder.shuffle`, default is 5.
 
         seed (int):  
             Random seed.
@@ -113,7 +113,7 @@ class ZCurveBuilder:
                 {'n': 2, 'local': True},
                 {'n': 3, 'local': True}
             ]  # Final number of generated parameters: 189
-            self.encoder = BatchZCurveEncoder(
+            self.encoder = BatchZcurveEncoder(
                 hyper_params=hyper_params,
                 n_jobs=n_jobs
             )
@@ -215,7 +215,7 @@ class ZCurveBuilder:
         return labels, scores
 
 
-class ZCurveSegmenter:
+class ZcurveSegmenter:
     """
     Z-curve segmenter based on genome order number, which can be considered an 
     extended version of the GC-Profile's core. It has 7 modes and can be used 
@@ -272,7 +272,7 @@ class ZCurveSegmenter:
         """
         Recursive function for segmenting Z-curves.
         """
-        plotter = ZCurvePlotter(record)
+        plotter = ZcurvePlotter(record)
         max_point, max_value = methodcaller(self.func[self.mode], only_m=True)(plotter)
         left_len, right_len = max_point, len(record) - max_point
 

@@ -2,14 +2,14 @@
 # PASS 2025-03-03
 import sys
 import pkg_resources
-from ZCurvePy import ZCurveSegmenter, ZCurvePlotter, __version__
+from ZcurvePy import ZcurveSegmenter, ZcurvePlotter, __version__
 from Bio.SeqIO import parse
-from ZCurvePy.RunnableScriptsUtil import download_acc, has_gui
+from ZcurvePy.Util import download_acc, has_gui
 import matplotlib
 HAS_GUI = has_gui()
 matplotlib.use("TkAgg" if HAS_GUI else "Agg")
 from matplotlib import pyplot as plt
-from _ZCurvePy import ZCurvePlotter
+from _ZcurvePy import ZcurvePlotter
 from operator import methodcaller
 import argparse
 
@@ -36,7 +36,7 @@ Modes:
 (6) GC: segmentation for GC-disparity  (S(P) = g^2 + c^2)
 (7) CG: segmentation for CpG-profile   (S(P) = CpG^2 + (1-CpG)^2)
 
-Tips: Use the Z-curve method more flexibly through our ZCurvePy's APIs! 
+Tips: Use the Z-curve method more flexibly through our ZcurvePy's APIs! 
 """
 
 # help information
@@ -113,7 +113,7 @@ def visualize(
     intv = 10
     plt.rc('font', family='Times New Roman')
     plt.rcParams.update({"font.size": 14})
-    plotter = ZCurvePlotter(record)
+    plotter = ZcurvePlotter(record)
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot()
     ax.set_title(f'Mode = {mode}')
@@ -134,7 +134,7 @@ def visualize(
         try:
             manager = plt.get_current_fig_manager()
             fig.canvas.manager.set_window_title("Z-curve Plotter (Powered by Matplotlib)")
-            res_path = pkg_resources.resource_filename("ZCurvePy", "assets/image/icon.ico")
+            res_path = pkg_resources.resource_filename("ZcurvePy", "assets/image/icon.ico")
             manager.window.iconbitmap(res_path)
             plt.show()
         except Exception as exception:
@@ -175,11 +175,11 @@ def main():
     plot_range = list(range(start - length, 0)) + list(range(0, end)) if start > end else list(range(start, end))
     record = record[start:] + record[:end] if start > end else record[start:end]
     
-    if mode not in ZCurveSegmenter.func.keys():
+    if mode not in ZcurveSegmenter.func.keys():
         print(f"{command_name}: [error] unknown mode '{mode}'. ")
         sys.exit()
     
-    segmenter = ZCurveSegmenter(mode=mode, halting=halting, min_len=minlen, max_depth=maxdepth)
+    segmenter = ZcurveSegmenter(mode=mode, halting=halting, min_len=minlen, max_depth=maxdepth)
     seg_points = segmenter.run(record)
     real_locs = [[plot_range[i], v] for i, v in seg_points]
 

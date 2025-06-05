@@ -6,14 +6,14 @@ import json
 import sys
 import argparse
 from Bio import SeqIO
-from ZCurvePy import __version__
-from ZCurvePy.RunnableScriptsUtil import download_acc, has_gui
+from ZcurvePy import __version__
+from ZcurvePy.Util import download_acc, has_gui
 import matplotlib
 HAS_GUI = has_gui()
 matplotlib.use("TkAgg" if HAS_GUI else "Agg")
 from matplotlib import pyplot as plt
 from operator import methodcaller
-from _ZCurvePy import ZCurvePlotter
+from _ZcurvePy import ZcurvePlotter
 
 # curve names
 names = {
@@ -28,8 +28,6 @@ names = {
     "AP" : "AT' curve",
     "GP" : "GC' curve",
     "CG" : "CpG' curve",
-    "AS" : "AT skew",
-    "GS" : "GC skew"
 }
 
 prog_infor = \
@@ -65,7 +63,7 @@ The content of setting file should be like:
             "intv": 5,
             "curve2d": "XP,YP,ZP"
         },
-        // ...W
+        // ...
     ]
 }
 
@@ -84,7 +82,7 @@ Note: 1. If any of the param is not existing, the programs will use defaults.
          will default the topology property of the sequence to ring and go on.
       3. 'intv' only effects the sampling interval when plotting visual curves.
 
-Tips: Use the Z-curve method more flexibly through our ZCurvePy's APIs! 
+Tips: Use the Z-curve method more flexibly through our ZcurvePy's APIs! 
 """
 
 arg_fasta = "    input genome files as FASTA format (*.fa; *.fasta; *.fna)"
@@ -107,9 +105,7 @@ types = {
     "ZP"  : "z_prime_curve",
     "AP"  : "AT_prime_curve",
     "GP"  : "GC_prime_curve",
-    "CG"  : "CpG_prime_curve",
-    "AS"  : "AT_skew",
-    "GS"  : "GC_skew"
+    "CG"  : "CpG_prime_curve"
 }
 
 def checkInputs(args: dict, command_name: str):
@@ -193,7 +189,7 @@ def handleInputs3D(
                 sys.exit()
             
             curves = []
-            plotter = ZCurvePlotter(record)
+            plotter = ZcurvePlotter(record)
 
             for typ in curve_types:
                 if typ not in types.keys():
@@ -232,7 +228,7 @@ def visualize3D(curve_list: list, png: str, show: bool):
         try:
             manager = plt.get_current_fig_manager()
             fig.canvas.manager.set_window_title("Z-curve Plotter (Powered by Matplotlib)")
-            res_path = pkg_resources.resource_filename("ZCurvePy", "assets/image/icon.ico")
+            res_path = pkg_resources.resource_filename("ZcurvePy", "assets/image/icon.ico")
             manager.window.iconbitmap(res_path)
             plt.show()
         except Exception as exception:

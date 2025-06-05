@@ -1,10 +1,10 @@
 /* * * * * * * * * * * * * * * * * * * *
- *  ZCurvePy C/C++ Core Module         *
+ *  ZcurvePy C/C++ Core Module         *
  *                                     *
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2024-12-09            *
- *  @version     1.5.12                *
+ *  @version     1.6.0                 *
  * * * * * * * * * * * * * * * * * * * */
 
 #ifndef ZCURVEPY_CORE
@@ -113,10 +113,17 @@ int CpGDeltaSTrans(char *, int, float *, int, float &);
 /* Do tetrahedron Transform */
 void tetrahedron(char *, int, float **);
 
+/* Calculate sliding window WS-skew */
+void WSSkew(char *, int, int, float *);
+
 /* Calculate sliding window AT-skew */
 void ATSkew(char *, int, int, float *);
 /* Calculate sliding window GC-skew */
 void GCSkew(char *, int, int, float *);
+/* Calculate sliding window AT fraction */
+void ATFraction(char *, int, int, float *);
+/* Calculate sliding window GC fraction */
+void GCFraction(char *, int, int, float *);
 
 #ifdef __cplusplus
 }

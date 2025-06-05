@@ -1,8 +1,6 @@
-# ZCurvePy (Lastest version 1.5.12)
+# ZcurvePy (Lastest version 1.6.0)
 
 *A high performance Python toolkit for the Z-curve theory developed by **T**ianjin **U**niversity **B**io**I**nformatics **C**enter (**TUBIC**)*  
-
-![ZCurvePy LOGO](./logo.png)
 
 ## Note:  
 This page only provides a brief description of the software.  
@@ -27,7 +25,7 @@ For more information, please visit our full API and help documentation on [this 
 - [Acknowledgement](#title8)
 
 ## Overview <a id="title1"></a>
-ZCurvePy aims to build a comprehensive, one-stop bioinformatics platform designed to streamline nucleic acid sequence analysis through the mathematical framework of the Z-curve theory. It empowers researchers to extract DNA/RNA structural features, identify functional genomic elements, and build predictive models with cutting-edge computational tools.
+ZcurvePy aims to build a comprehensive, one-stop bioinformatics platform designed to streamline nucleic acid sequence analysis through the mathematical framework of the Z-curve theory. It empowers researchers to extract DNA/RNA structural features, identify functional genomic elements, and build predictive models with cutting-edge computational tools.
 ### Core Capabilities <a id="subtitle1"></a>
 - **Genome Visualization with Z-curves**  
 Generate Z-curves and their derivatives (e.g., GC disparity, CpG profile) from raw sequences, with customizable visualization of geometric features displayed in 2D or 3D. Supports FASTA and GenBank formats. 
@@ -52,10 +50,10 @@ Construct nucleic acid sequence classifier with biological function based on mac
     - **Python API**  
     Object-oriented interfaces for developers, enabling customizable workflows and real-time result callbacks, e.g.
         ```python
-        # Init ZCurveEncoder
-        from ZCurvePy import BatchZCurveEncoder
+        # Init ZcurveEncoder
+        from ZcurvePy import BatchZcurveEncoder
         hyper_params = [ ... ]
-        encoder = BatchZCurveEncoder(hyper_params, n_jobs=8)
+        encoder = BatchZcurveEncoder(hyper_params, n_jobs=8)
         # Load and process data
         from Bio.SeqIO import parse
         records = parse("example.fa", "fasta")
@@ -69,7 +67,7 @@ Construct nucleic acid sequence classifier with biological function based on mac
     - **Visualization Tools**  
     Export Z-curve trajectories as [Matplotlib](https://matplotlib.org/) static plots or [Plotly](https://plotly.com/) interactive HTML.
 ## Installation <a id="title2"></a>
-Python includes the package management system `pip` which should allow you to install ZCurvePy and its dependencies if needed, as well as upgrade or uninstall with just one command in the terminal:
+Python includes the package management system `pip` which should allow you to install ZcurvePy and its dependencies if needed, as well as upgrade or uninstall with just one command in the terminal:
 ```bash
 python -m pip install zcurvepy
 python -m pip install --upgrade zcurvepy
@@ -89,8 +87,8 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
    (1) Python API implementation:  
 
     ```python
-    from ZCurvePy import ZCurvePlotter
-    from ZCurvePy.RunnableScriptsUtil import download_acc
+    from ZcurvePy import ZcurvePlotter
+    from ZcurvePy.Util import download_acc
     from Bio.SeqIO import read
     import matplotlib.pyplot as plt
     # Download genomes (Please wait for several seconds)
@@ -98,9 +96,9 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
     ax3d = plt.figure().add_subplot(projection='3d')
     ax2d = plt.figure().add_subplot()
     for save_path in save_paths:
-        record = read(save_path, "genbank")
+        record = read(save_path, "fasta")
         # Calculate components of smoothed Z-curve
-        plotter = ZCurvePlotter(record)
+        plotter = ZcurvePlotter(record)
         n, x, y, _ = plotter.z_curve(window=1000)
         zp, _ = plotter.z_prime_curve(window=1000, return_n=False)
         # Matplotlib 2D display
@@ -151,28 +149,30 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
     (1) Python API implementation:  
 
     ```python
-    from ZCurvePy.RunnableScriptsUtil import download_acc, extract_CDS
-    save_paths = download_acc("NC_000854.2")
+    from ZcurvePy.Util import download_acc, extract_CDS
+    import numpy as np
+    save_paths = download_acc("NC_000854.2", __name__, "gb")
     records = extract_CDS(save_paths[0])
 
-    from ZCurvePy import ZCurveEncoder
+    from ZcurvePy import ZcurveEncoder
     def encoding(record):
         """ simple batch processing """
-        encoder, feature = ZCurveEncoder(record), []
+        encoder = ZcurveEncoder(record)
         # Calculate and concatenate 765-bit Z-curve transform
-        feature += encoder.mononucl_phase_transform(freq=True)
-        feature += encoder.dinucl_phase_transform(freq=True)
-        feature += encoder.trinucl_phase_transform(freq=True)
-        feature += encoder.k_nucl_phase_transform(k=4, freq=True)
+        feature = encoder.mononucl_phase_transform(freq=True)
+        feature = np.concatenate((feature, encoder.dinucl_phase_transform(freq=True)))
+        feature = np.concatenate((feature, encoder.trinucl_phase_transform(freq=True)))
+        feature = np.concatenate((feature, encoder.k_nucl_phase_transform(k=4, freq=True)))
         return feature
-    
-    features = [encoding(record) for record in records]
+
+    features = np.array([encoding(record) for record in records])
+    print(features.shape)
     ```
 
     or use another more powerful API to implement multi-threading:
 
     ```python
-    from ZCurvePy import BatchZCurveEncoder
+    from ZcurvePy import BatchZcurveEncoder
     # Define the hyper-paramsfor 765-bit Z-curve transform
     hyper_params = [
         {"k": 1, "freq": True}  # Same as mononucl_phase_transform(freq=True)
@@ -180,7 +180,7 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
         {"k": 3, "freq": True}  # Same as trinucl_phase_transform(freq=True)
         {"k": 4, "freq": True}  # Same as k_nucl_phase_transform(k=4, freq=True)
     ]
-    encoder = BatchZCurveEncoder(hyper_params, n_jobs=8)
+    encoder = BatchZcurveEncoder(hyper_params, n_jobs=8)
     features = encoder(records)
     ```
     (2) Commandline usage:
@@ -208,23 +208,23 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
 3. Segmentation for DNA sequences<a id="section3"></a>  
     Python API implementation:
     ```python
-    from ZCurvePy.RunnableScriptsUtil import download_acc
+    from ZcurvePy.Util import download_acc
     from Bio.SeqIO import read
-    from ZCurvePy import ZCurveSegmenter, ZCurvePlotter
+    from ZcurvePy import ZcurveSegmenter, ZcurvePlotter
     import matplotlib.pyplot as plt
     # Download data
     path = download_acc("CP001956.1")
-    record = SeqIO.read(path[0], "gb")
+    record = read(path[0], "fasta")
     # Segmentation
-    segmenter = ZCurveSegmenter(mode='WS', min_len=50000)
+    segmenter = ZcurveSegmenter(mode='WS', min_len=50000)
     seg_points = segmenter.run(record)
     # Calculate z' curve for visualization
-    plotter = ZCurvePlotter(record)
+    plotter = ZcurvePlotter(record)
     n, zp, _ = plotter.z_prime_curve()
     # Visualization
     for point, _ in seg_points:
-        plt.axvline(point)
-    plt.plot(x)
+        plt.axvline(point, color='red')
+    plt.plot(n, zp)
     plt.show()
     ```
     Commandline usage:
@@ -237,20 +237,20 @@ Windows 10/11, macOS, and Linux running on x86_64 arch are supported. Note that 
     # We recommend turning on the acceleration system on Intel platforms
     from sklearnex import patch_sklearn
     patch_sklearn()
-    from ZCurvePy.RunnableScriptsUtil import download_acc, extract_CDS
-    from ZCurvePy import ZCurveBuilder
+    from ZcurvePy.Util import download_acc, extract_CDS
+    from ZcurvePy import ZcurveBuilder
     from Bio.SeqIO import read, parse
     # Load positive dataset
-    path = download_acc("NC_000913.3")[0]
+    path = download_acc("NC_000913.3", __name__, "gb")[0]
     pos_dataset = extract_CDS(path)
-    builder = ZCurveBuilder(standard=True, n_jobs=8)
+    builder = ZcurveBuilder(standard=True, n_jobs=8)
     builder.fit(pos_dataset)
     # Some sample sequences
     records = parse("samples.fa", "fasta")
     results = builder.predict(records)
     ```
 ## Web Server & Database <a id="title4"></a>
-A free, flexible and interactive **ZCurveHub Web Service** as well as updated **Z-curve Database** is available at http://tubic.tju.edu.cn/zcurve/.
+A free, flexible and interactive **ZcurveHub** Web Service as well as updated **ZcurveDB** is available at http://tubic.tju.edu.cn/zcurve/.
 
 ## Reference <a id="title5"></a>
 [1] &nbsp; Guo FB, Ou HY, Zhang CT. ZCURVE: a new system for recognizing protein-coding genes in bacterial and archaeal genomes. Nucleic Acids Res. 2003 Mar 15;31(6):1780-9. doi: 10.1093/nar/gkg254. [[Pubmed]](https://pubmed.ncbi.nlm.nih.gov/12626720/)  
@@ -276,6 +276,8 @@ A free, flexible and interactive **ZCurveHub Web Service** as well as updated **
 ## Citation <a id="title6"></a>
 The paper on this work has not yet been published. If you would like to cite this software in your work, please contact us to discuss alternatives.
 
+Z Zhang, Y Lin, H Luo, F Gao. ZcurveHub: an updated large-scale Z curve knowledgebase with Scalable Genome Analysis Framework.
+
 ## Contact <a id="title7"></a>
 The offical website of TUBIC: https://tubic.org/ | https://tubic.tju.edu.cn .  
 If you have any questions about this software, please contact fgao@tju.edu.cn .  
@@ -286,4 +288,4 @@ Tianjin, China, 300072
 Telephone: +86-22-27402697  
 
 ## Acknowledgement <a id="title8"></a>
-Thanks to **TUBIC** for supporting this project, **Prof. Gao**, **Assoc. Prof. Lin** and **Assoc. Prof. Luo** for their careful guidance, **Assoc. Prof. Wu** for his close attention. <p align="right">— Zhang ZT</p>
+The authors wishes to thank Chun-Ting Zhang, Academician of the Chinese Academy of Sciences, who proposed the Z-curve theory and his collaborators Ren Zhang, Lin-Lin Chen, Hong-Yu Ou and Feng-Biao Guo for their significant contributions to the development of the theory.  <p align="right">— Staff of TUBIC, 2025-06-02</p>

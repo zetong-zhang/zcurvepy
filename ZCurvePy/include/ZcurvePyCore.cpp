@@ -1,4 +1,4 @@
-#include"ZCurvePyCore.h"
+#include"ZcurvePyCore.h"
 /* 
  * Map for converting ASCII chars into one-hot vectors
  *
@@ -942,21 +942,18 @@ void gcTrans(char *seq, int len, float *params, int window) {
 
 float xPrimeTrans(char *seq, int len, float *params, int window) {
     float counts = 0.0f;
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i;
 
     for (i = 0; i < len; i ++) {
         counts += Z_HOT[seq[i]][X];
         params[i] = counts;
     }
-
-    xAvr = (len - 1) / 2.0f;
-    x2Sum = (2 * len - 1) / 6.0f * len * (len - 1);
     
     for (i = 0, ySum = 0, xySum = 0; i < len; i ++)
-        ySum += params[i], xySum += i * params[i];
+        ySum += params[i], xySum += params[i] * i;
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * len);
+    kp = (xySum / (len - 1) - ySum / 2) / len / (len + 1) * 12;
     
     for (i = 1; i < len; i++)
         params[i] -= ((float) kp) * i;
@@ -968,21 +965,18 @@ float xPrimeTrans(char *seq, int len, float *params, int window) {
 
 float yPrimeTrans(char *seq, int len, float *params, int window) {
     float counts = 0.0f;
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i;
 
     for (i = 0; i < len; i ++) {
         counts += Z_HOT[seq[i]][Y];
         params[i] = counts;
     }
-
-    xAvr = (len - 1) / 2.0f;
-    x2Sum = (2 * len - 1) / 6.0f * len * (len - 1);
     
     for (i = 0, ySum = 0, xySum = 0; i < len; i ++)
         ySum += params[i], xySum += i * params[i];
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * len);
+    kp = (xySum / (len - 1) - ySum / 2) / len / (len + 1) * 12;
     
     for (i = 1; i < len; i++)
         params[i] -= ((float) kp) * i;
@@ -994,7 +988,7 @@ float yPrimeTrans(char *seq, int len, float *params, int window) {
 
 float zPrimeTrans(char *seq, int len, float *params, int window) {
     float counts = 0.0f;
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i;
 
     for (i = 0; i < len; i ++) {
@@ -1002,13 +996,10 @@ float zPrimeTrans(char *seq, int len, float *params, int window) {
         params[i] = counts;
     }
 
-    xAvr = (len - 1) / 2.0f;
-    x2Sum = (2 * len - 1) / 6.0f * len * (len - 1);
-
     for (i = 0, ySum = 0, xySum = 0; i < len; i ++)
         ySum += params[i], xySum += i * params[i];
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * len);
+    kp = (xySum / (len - 1) - ySum / 2) / len / (len + 1) * 12;
     
     for (i = 1; i < len; i++)
         params[i] -= ((float) kp) * i;
@@ -1020,7 +1011,7 @@ float zPrimeTrans(char *seq, int len, float *params, int window) {
 
 float atPrimeTrans(char *seq, int len, float *params, int window) {
     float counts[4] = { 0.0f };
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i, j;
 
     for (i = 0; i < len; i ++) {
@@ -1030,13 +1021,10 @@ float atPrimeTrans(char *seq, int len, float *params, int window) {
         params[i] = counts[0] - counts[3];
     }
 
-    xAvr = (len - 1) / 2.0f;
-    x2Sum = (2 * len - 1) / 6.0f * len * (len - 1);
-
     for (i = 0, ySum = 0, xySum = 0; i < len; i ++)
         ySum += params[i], xySum += i * params[i];
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * len);
+    kp = (xySum / (len - 1) - ySum / 2) / len / (len + 1) * 12;
     
     for (i = 1; i < len; i++)
         params[i] -= ((float) kp) * i;
@@ -1048,7 +1036,7 @@ float atPrimeTrans(char *seq, int len, float *params, int window) {
 
 float gcPrimeTrans(char *seq, int len, float *params, int window) {
     float counts[4] = { 0.0f };
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i, j;
 
     for (i = 0; i < len; i ++) {
@@ -1058,13 +1046,10 @@ float gcPrimeTrans(char *seq, int len, float *params, int window) {
         params[i] = counts[1] - counts[2];
     }
 
-    xAvr = (len - 1) / 2.0f;
-    x2Sum = (2 * len - 1) / 6.0f * len * (len - 1);
-
     for (i = 0, ySum = 0, xySum = 0; i < len; i ++)
         ySum += params[i], xySum += i * params[i];
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * len);
+    kp = (xySum / (len - 1) - ySum / 2) / len / (len + 1) * 12;
     
     for (i = 1; i < len; i++)
         params[i] -= ((float) kp) * i;
@@ -1076,7 +1061,7 @@ float gcPrimeTrans(char *seq, int len, float *params, int window) {
 
 float CpGPrimeTrans(char *seq, int len, float *params, int window) {
     float counts[2] = {0};
-    double xAvr, x2Sum, ySum, xySum, kp;
+    double ySum, xySum, kp;
     int i, j, k;
 
     for (i = 0; i < len - 1; i ++) {
@@ -1087,13 +1072,10 @@ float CpGPrimeTrans(char *seq, int len, float *params, int window) {
         params[i] = counts[1] - counts[0];
     }
 
-    xAvr = len / 2.0f - 1;
-    x2Sum = (2 * len - 3) / 6.0f * (len - 1) * (len - 2);
-
     for (i = 0, ySum = 0, xySum = 0; i < len - 1; i ++)
         ySum += params[i], xySum += i * params[i];
 
-    kp = (xySum - xAvr * ySum) / (x2Sum - xAvr * xAvr * (len - 1));
+    kp = (xySum / (len - 2) - ySum / 2) / len / (len - 1) * 12;
     
     for (i = 1; i < len - 1; i ++)
         params[i] -= ((float) kp) * i;
@@ -1123,7 +1105,7 @@ int genomeDeltaSTrans(char *seq, int len, float *params, int window, float &max)
         params[i] = (s * (i + 1) / len * (len - i - 1));
     }
 
-    params[len - 1] = 0;
+    params[len - 1] = 0.0;
 
     meanSmoothing(params, len, window);
 
@@ -1225,22 +1207,31 @@ int wsDeltaSTrans(char *seq, int len, float *params, int window, float &max) {
 }
 
 int atDeltaSTrans(char *seq, int len, float *params, int window, float &max) {
-    float p[2] = {0}, q[2] = {0}, dif[2] = {0}, s;
-    int i, j, maxPoint = -1;
+    float p[2] = {0}, q[2] = {0}, dif[2] = {0}, s, sp, sq;
+    int i, maxPoint = -1;
 
-    for (i = 0; i < len; i ++)
-        for (j = 0; j < 2; j ++)
-            q[j] += AT_HOT[seq[i]][j];
+    for (i = 0; i < len; i ++) {
+        q[0] += AT_HOT[seq[i]][0];
+        q[1] += AT_HOT[seq[i]][1];
+    }
+
+    const float ts = q[0] + q[1] + 1E-3F;
     
     for (i = 0; i < len - 1; i ++) {
-        for (j = 0, s = 0; j < 2; j ++) {
-            p[j] += AT_HOT[seq[i]][j];
-            q[j] -= AT_HOT[seq[i]][j];
-            dif[j] = p[j] / (i + 1) - q[j] / (len - i - 1);
-            s += dif[j] * dif[j];
-        }
+        p[0] += AT_HOT[seq[i]][0];
+        q[0] -= AT_HOT[seq[i]][0];
+        p[1] += AT_HOT[seq[i]][1];
+        q[1] -= AT_HOT[seq[i]][1];
 
-        params[i] = (s * (i + 1) / len * (len - i - 1));
+        sp = p[0] + p[1] + 1E-3F;
+        sq = q[0] + q[1] + 1E-3F;
+
+        dif[0] = p[0] / sp - q[0] / sq;
+        dif[1] = p[1] / sp - q[1] / sq;
+        
+        s = dif[0] * dif[0] + dif[1] * dif[1];
+
+        params[i] = (s * sp / ts * sq);
     }
 
     params[len - 1] = 0;
@@ -1255,22 +1246,31 @@ int atDeltaSTrans(char *seq, int len, float *params, int window, float &max) {
 }
 
 int gcDeltaSTrans(char *seq, int len, float *params, int window, float &max) {
-    float p[2] = {0}, q[2] = {0}, dif[2] = {0}, s;
-    int i, j, maxPoint = -1;
+    float p[2] = {0}, q[2] = {0}, dif[2] = {0}, s, sp, sq;
+    int i, maxPoint = -1;
 
-    for (i = 0; i < len; i ++)
-        for (j = 0; j < 2; j ++)
-            q[j] += GC_HOT[seq[i]][j];
+    for (i = 0; i < len; i ++) {
+        q[0] += GC_HOT[seq[i]][0];
+        q[1] += GC_HOT[seq[i]][1];
+    }
+
+    const float ts = q[0] + q[1] + 1E-3F;
     
     for (i = 0; i < len - 1; i ++) {
-        for (j = 0, s = 0; j < 2; j ++) {
-            p[j] += GC_HOT[seq[i]][j];
-            q[j] -= GC_HOT[seq[i]][j];
-            dif[j] = p[j] / (i + 1) - q[j] / (len - i - 1);
-            s += dif[j] * dif[j];
-        }
+        p[0] += GC_HOT[seq[i]][0];
+        q[0] -= GC_HOT[seq[i]][0];
+        p[1] += GC_HOT[seq[i]][1];
+        q[1] -= GC_HOT[seq[i]][1];
 
-        params[i] = (s * (i + 1) / len * (len - i - 1));
+        sp = p[0] + p[1] + 1E-3F;
+        sq = q[0] + q[1] + 1E-3F;
+
+        dif[0] = p[0] / sp - q[0] / sq;
+        dif[1] = p[1] / sp - q[1] / sq;
+        
+        s = dif[0] * dif[0] + dif[1] * dif[1];
+
+        params[i] = (s * sp / ts * sq);
     }
 
     params[len - 1] = 0;
@@ -1323,6 +1323,35 @@ void tetrahedron(char *seq, int len, float **params) {
     for (int i = 0; i < 3; i ++)
         for (int j = 0; j < len; j ++)
             params[i][j] = Z_HOT[seq[j]][i];
+}
+
+void WSSkew(char *seq, int len, int window, float *params) {
+    float countW = 0.0F, countS = 0.0F;
+    int half = (int) (window / 2);
+    
+    int i;
+    for (i = 0; i < half - 1; i ++) {
+        countS += WS_HOT[seq[i]][0];
+        countW += WS_HOT[seq[i]][1];
+    }
+
+    int s, e;
+    for (i = 0; i < len; i ++) {
+        s = (i - half) > 0 ? (i - half) : 0;
+        e = (i + half - 1) < len ? (i + half - 1) : len;
+
+        if (s > 0) {
+            countS -= WS_HOT[seq[s - 1]][0];
+            countW -= WS_HOT[seq[s - 1]][1];
+        }
+
+        if (e < len) {
+            countS += WS_HOT[seq[e]][0];
+            countW += WS_HOT[seq[e]][1];
+        }
+
+        params[i] = (countW - countS) / window;
+    }
 }
 
 void ATSkew(char *seq, int len, int window, float *params) {
@@ -1383,6 +1412,18 @@ void GCSkew(char *seq, int len, int window, float *params) {
         float sum = countG + countC;
         params[i] = sum == 0.0F ? 0.0F : ((countG - countC) / sum);
     }
+}
+
+void ATFraction(char *seq, int len, int window, float *params) {
+    for (int i = 0; i < len; i ++)
+        params[i] = WS_HOT[seq[i]][1];
+    meanSmoothing(params, len, window);
+}
+
+void GCFraction(char *seq, int len, int window, float *params) {
+    for (int i = 0; i < len; i ++)
+        params[i] = WS_HOT[seq[i]][0];
+    meanSmoothing(params, len, window);
 }
 
 #ifdef __cplusplus

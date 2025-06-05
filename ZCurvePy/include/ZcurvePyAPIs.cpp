@@ -1,20 +1,20 @@
 /* * * * * * * * * * * * * * * * * * * *
- *  ZCurvePy Source Code               *
+ *  ZcurvePy Source Code               *
  *                                     *
  *  @author      Zhang ZT, Gao F       *
  *  @copyright   Copyright 2025 TUBIC  *
  *  @date        2025-02-25            *
- *  @version     1.5.12                *
+ *  @version     1.6.0                 *
  * * * * * * * * * * * * * * * * * * * */
 
-#include"ZCurvePyAPIs.h"
+#include"ZcurvePyAPIs.h"
 
-// Extern variables from ZCurvePyAPIs.h
+// Extern variables from ZcurvePyAPIs.h
 
 PyObject *keyK = nullptr;
 PyObject *keyPhase = nullptr;
 PyObject *keyNJobs = nullptr;
-PyObject *_ZCurvePy = nullptr;
+PyObject *_ZcurvePy = nullptr;
 PyObject *keyHyper = nullptr;
 PyObject *keyFreq = nullptr;
 PyObject *keyLocal = nullptr;
@@ -46,7 +46,7 @@ static char *kwListCurve[] = {"window", "return_n", NULL};
  * @param only_m   : only return max point location
  */
 static char *kwListdSCurve[] = {"window", "return_n", "only_m", NULL};
-/* Modes for BatchZCurvePlotter */
+/* Modes for BatchZcurvePlotter */
 /* 
  * @param accum   : cumlulative curves
  * @param profile : fitted curves
@@ -178,7 +178,6 @@ static PyObject* convertToNumpy(float** paramList, int rows, int cols) {
  */
 static PyObject *toCurve(float *params, int len, bool return_n) {
     /* PASS 2025-02-26 */
-    PyObject *value;
 
     if (return_n) {
         PyObject *xList = genNumpyArange(len);
@@ -263,7 +262,7 @@ static void multiThreadShuffle(
 extern "C" {
 #endif
 /* shuffle C/C++ API able to handle many-type Python objects, like str, Seq and SeqRecord */
-PyObject *ZCurvePy_shuffle(PyObject *self, PyObject *args, PyObject *kw) {
+PyObject *ZcurvePy_shuffle(PyObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-26 */
     static char *kwlist[] = {"records", "ratio", "seed", "n_jobs", NULL};
     int ratio = 1, seed = -1, nJobs = -1;
@@ -520,7 +519,7 @@ static void multiThreadDecoding(
 extern "C" {
 #endif
 /* decoding z-curves */
-PyObject *ZCurvePy_decode(PyObject *self, PyObject *args, PyObject *kw) {
+PyObject *ZcurvePy_decode(PyObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-03-02 */
     static char *kwlist[] = {"data", "k_values", "mode", "n_jobs", NULL};
     PyObject *data = NULL;
@@ -604,40 +603,40 @@ PyObject *ZCurvePy_decode(PyObject *self, PyObject *args, PyObject *kw) {
 #ifdef __cplusplus
 }
 #endif
-/* ZCurveEncoder python object */
+/* ZcurveEncoder python object */
 typedef struct {
     PyObject_HEAD
     /* 
      * A Python str stores nucleic acid sequence information.
-     * It is a completely 'private' member that can only be handled by ZCurveEncoder itself.
+     * It is a completely 'private' member that can only be handled by ZcurveEncoder itself.
      * The C++ object's char array member shares the same memory with pyStr.
      */
     PyObject *pyStr;
     char *cppStr;
     int len;
-} ZCurveEncoderObject;
-/* ZCurveEncoder.__del__ */
+} ZcurveEncoderObject;
+/* ZcurveEncoder.__del__ */
 /* Deal with the memory of cppObject and the private Python str */
-static void ZCurveEncoder_dealloc(ZCurveEncoderObject *self) {
+static void ZcurveEncoder_dealloc(ZcurveEncoderObject *self) {
     /* PASS 2025-02-25 */
     Py_XDECREF(self->pyStr);
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
-/* ZCurveEncoder.__new__ */
-static PyObject *ZCurveEncoder_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+/* ZcurveEncoder.__new__ */
+static PyObject *ZcurveEncoder_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     /* PASS 2025-02-25 */
-    ZCurveEncoderObject *self;
+    ZcurveEncoderObject *self;
     
-    self = (ZCurveEncoderObject *) type->tp_alloc(type, 0);
+    self = (ZcurveEncoderObject *) type->tp_alloc(type, 0);
     self->pyStr = NULL;
 
     return (PyObject *) self;
 }
-/* ZCurveEncoder.__init__ */
+/* ZcurveEncoder.__init__ */
 /* 
- * The init of ZCurveEncoder
+ * The init of ZcurveEncoder
  */
-static int ZCurveEncoder_init(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static int ZcurveEncoder_init(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     static char *kwlist[] = {"seq_or_record", NULL};
     PyObject *pySeq;
@@ -662,88 +661,88 @@ static int ZCurveEncoder_init(ZCurveEncoderObject *self, PyObject *args, PyObjec
 
     return 0;
 }
-/* ZCurveEncoder.__repr__ */
+/* ZcurveEncoder.__repr__ */
 /*
- * Represent the current sequence information being handled by ZCurveEncoder.
+ * Represent the current sequence information being handled by ZcurveEncoder.
  *
  * When the length of sequence less than 60, it displays the complete sequence;
  * else it only displays the opening part and the ending part.
  * 
  * Call by PyObject_Str and PyObject_Repr
  */
-static PyObject *ZCurveEncoder_repr(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_repr(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     char message[75], *pseq = self->cppStr;
     int l;
     
     if ((l = self->len) <= 60)
-        strcat(strcat(strcpy(message, "ZCurveEncoder(\""), pseq), "\")");
+        strcat(strcat(strcpy(message, "ZcurveEncoder(\""), pseq), "\")");
     else {
-        strncat(strcpy(message, "ZCurveEncoder(\""), pseq, 29);
+        strncat(strcpy(message, "ZcurveEncoder(\""), pseq, 29);
         strcat(strcat(strcpy(message + 40, "..."), pseq + l - 29), "\")");
     }
 
     return Py_BuildValue("s", message);
 }
-/* ZCurveEncoder.genome_order_index */
+/* ZcurveEncoder.genome_order_index */
 /*
  * Calculate genome order index: S = a^2 + t^2 + c^2 + g^2
  */
-static PyObject *ZCurveEncoder_genomeOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_genomeOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", genomeOrderIndex(self->cppStr, self->len));
 }
 /*
  * Calculate RY order index: S = (a + g)^2 + (t + c)^2
  */
-static PyObject *ZCurveEncoder_ryOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_ryOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", ryOrderIndex(self->cppStr, self->len));
 }
 /*
  * Calculate MK order index: S = (a + c)^2 + (t + g)^2
  */
-static PyObject *ZCurveEncoder_mkOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_mkOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", mkOrderIndex(self->cppStr, self->len));
 }
-/* ZCurveEncoder.WS_order_index */
+/* ZcurveEncoder.WS_order_index */
 /*
  * Calculate WS order index: S = (a + t)^2 + (g + c)^2
  */
-static PyObject *ZCurveEncoder_wsOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_wsOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", wsOrderIndex(self->cppStr, self->len));
 }
-/* ZCurveEncoder.AT_order_index */
+/* ZcurveEncoder.AT_order_index */
 /*
  * Calculate AT order index: S = a^2 + t^2
  */
-static PyObject *ZCurveEncoder_atOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_atOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", atOrderIndex(self->cppStr, self->len));
 }
-/* ZCurveEncoder.GC_order_index */
+/* ZcurveEncoder.GC_order_index */
 /*
  * Calculate GC order index: S = g^2 + c^2
  */
-static PyObject *ZCurveEncoder_gcOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_gcOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", gcOrderIndex(self->cppStr, self->len));
 }
-/* ZCurveEncoder.CpG_order_index */
+/* ZcurveEncoder.CpG_order_index */
 /*
  * Calculate GC order index: S = p(CpG)^2 + p(_CpG)^2
  */
-static PyObject *ZCurveEncoder_CpGOrderIndex(ZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+static PyObject *ZcurveEncoder_CpGOrderIndex(ZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     return Py_BuildValue("f", CpGOrderIndex(self->cppStr, self->len));
 }
-/* ZCurveEncoder.mononucl_transform */
+/* ZcurveEncoder.mononucl_transform */
 /*
  * Do non-phase mononucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_monoTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_monoTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     float *params = new float[3]();
     bool freq = false;
@@ -758,11 +757,11 @@ static PyObject *ZCurveEncoder_monoTrans(ZCurveEncoderObject *self, PyObject *ar
 
     return toNumpyArray(params, 3);
 }
-/* ZCurveEncoder.dinucl_transform */
+/* ZcurveEncoder.dinucl_transform */
 /*
  * Do non-phase dinucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_diTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_diTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     float *params = new float[12]();
     bool freq = false;
@@ -777,11 +776,11 @@ static PyObject *ZCurveEncoder_diTrans(ZCurveEncoderObject *self, PyObject *args
 
     return toNumpyArray(params, 12);
 }
-/* ZCurveEncoder.trinucl_transform */
+/* ZcurveEncoder.trinucl_transform */
 /*
  * Do non-phase trinucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_triTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_triTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     float *params = new float[48]();
     bool freq = false;
@@ -796,11 +795,11 @@ static PyObject *ZCurveEncoder_triTrans(ZCurveEncoderObject *self, PyObject *arg
 
     return toNumpyArray(params, 48);
 }
-/* ZCurveEncoder.mononucl_phase_transform */
+/* ZcurveEncoder.mononucl_phase_transform */
 /*
  * Do phase-specific mononucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_monoPhaseTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_monoPhaseTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     bool freq = false;
     bool local = false;
@@ -818,11 +817,11 @@ static PyObject *ZCurveEncoder_monoPhaseTrans(ZCurveEncoderObject *self, PyObjec
 
     return toNumpyArray(params, 3 * phase);
 }
-/* ZCurveEncoder.dinucl_phase_transform */
+/* ZcurveEncoder.dinucl_phase_transform */
 /*
  * Do phase-specific dinucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_diPhaseTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_diPhaseTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     bool freq = false;
     bool local = false;
@@ -840,11 +839,11 @@ static PyObject *ZCurveEncoder_diPhaseTrans(ZCurveEncoderObject *self, PyObject 
     
     return toNumpyArray(params, phase * 12);
 }
-/* ZCurveEncoder.trinucl_phase_transform */
+/* ZcurveEncoder.trinucl_phase_transform */
 /*
  * Do phase-specific trinucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_triPhaseTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_triPhaseTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     bool freq = false;
     bool local = false;
@@ -862,11 +861,11 @@ static PyObject *ZCurveEncoder_triPhaseTrans(ZCurveEncoderObject *self, PyObject
 
     return toNumpyArray(params, phase * 48);
 }
-/* ZCurveEncoder.k_nucl_phase_transform */
+/* ZcurveEncoder.k_nucl_phase_transform */
 /*
  * Do phase-specific k-nucleotide Z-curve transform
  */
-static PyObject *ZCurveEncoder_kPhaseTrans(ZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *ZcurveEncoder_kPhaseTrans(ZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     bool freq = false;
     bool local = false;
@@ -887,37 +886,37 @@ static PyObject *ZCurveEncoder_kPhaseTrans(ZCurveEncoderObject *self, PyObject *
     return toNumpyArray(params, 3 * phase * k);
 }
 
-/* ZCurveEncoder's Member Methods */
-static PyMethodDef ZCurveEncoder_methods[] = {
-    {"genome_order_index", (PyCFunction) ZCurveEncoder_genomeOrderIndex, METH_NOARGS, NULL},
-    {"RY_order_index", (PyCFunction) ZCurveEncoder_ryOrderIndex, METH_NOARGS, NULL},
-    {"MK_order_index", (PyCFunction) ZCurveEncoder_mkOrderIndex, METH_NOARGS, NULL},
-    {"WS_order_index", (PyCFunction) ZCurveEncoder_wsOrderIndex, METH_NOARGS, NULL},
-    {"AT_order_index", (PyCFunction) ZCurveEncoder_atOrderIndex, METH_NOARGS, NULL},
-    {"GC_order_index", (PyCFunction) ZCurveEncoder_gcOrderIndex, METH_NOARGS, NULL},
-    {"CpG_order_index", (PyCFunction) ZCurveEncoder_CpGOrderIndex, METH_NOARGS, NULL},
-    {"mononucl_transform", (PyCFunction) ZCurveEncoder_monoTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"dinucl_transform", (PyCFunction) ZCurveEncoder_diTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"trinucl_transform", (PyCFunction) ZCurveEncoder_triTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"mononucl_phase_transform", (PyCFunction) ZCurveEncoder_monoPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"dinucl_phase_transform", (PyCFunction) ZCurveEncoder_diPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"trinucl_phase_transform", (PyCFunction) ZCurveEncoder_triPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"k_nucl_phase_transform", (PyCFunction) ZCurveEncoder_kPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+/* ZcurveEncoder's Member Methods */
+static PyMethodDef ZcurveEncoder_methods[] = {
+    {"genome_order_index", (PyCFunction) ZcurveEncoder_genomeOrderIndex, METH_NOARGS, NULL},
+    {"RY_order_index", (PyCFunction) ZcurveEncoder_ryOrderIndex, METH_NOARGS, NULL},
+    {"MK_order_index", (PyCFunction) ZcurveEncoder_mkOrderIndex, METH_NOARGS, NULL},
+    {"WS_order_index", (PyCFunction) ZcurveEncoder_wsOrderIndex, METH_NOARGS, NULL},
+    {"AT_order_index", (PyCFunction) ZcurveEncoder_atOrderIndex, METH_NOARGS, NULL},
+    {"GC_order_index", (PyCFunction) ZcurveEncoder_gcOrderIndex, METH_NOARGS, NULL},
+    {"CpG_order_index", (PyCFunction) ZcurveEncoder_CpGOrderIndex, METH_NOARGS, NULL},
+    {"mononucl_transform", (PyCFunction) ZcurveEncoder_monoTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"dinucl_transform", (PyCFunction) ZcurveEncoder_diTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"trinucl_transform", (PyCFunction) ZcurveEncoder_triTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"mononucl_phase_transform", (PyCFunction) ZcurveEncoder_monoPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"dinucl_phase_transform", (PyCFunction) ZcurveEncoder_diPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"trinucl_phase_transform", (PyCFunction) ZcurveEncoder_triPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"k_nucl_phase_transform", (PyCFunction) ZcurveEncoder_kPhaseTrans, METH_VARARGS|METH_KEYWORDS, NULL},
     {NULL, NULL, 0, NULL}
 };
 
-/* Python Type Object ZCurveEncoder*/
-PyTypeObject ZCurveEncoderType = {
+/* Python Type Object ZcurveEncoder*/
+PyTypeObject ZcurveEncoderType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_ZCurvePy.ZCurveEncoder",
-    sizeof(ZCurveEncoderObject),
+    "_ZcurvePy.ZcurveEncoder",
+    sizeof(ZcurveEncoderObject),
     0,
-    (destructor) ZCurveEncoder_dealloc,
+    (destructor) ZcurveEncoder_dealloc,
     NULL, /* tp_vectorcall_offset */
     NULL, /* tp_getattr */
     NULL, /* tp_setattr */
     NULL, /* tp_as_async */
-    (reprfunc) ZCurveEncoder_repr,
+    (reprfunc) ZcurveEncoder_repr,
     NULL, /* tp_as_number */
     NULL, /* tp_sq_methods */
     NULL, /* tp_mp_methods */
@@ -935,7 +934,7 @@ PyTypeObject ZCurveEncoderType = {
     NULL, /* tp_weaklistoffset */
     NULL, /* tp_iter */
     NULL, /* tp_iternext */
-    ZCurveEncoder_methods,
+    ZcurveEncoder_methods,
     NULL, /* tp_members */
     NULL, /* tp_getset */
     NULL, /* tp_base */
@@ -943,42 +942,42 @@ PyTypeObject ZCurveEncoderType = {
     NULL, /* tp_descr_get */
     NULL, /* tp_descr_set */
     NULL, /* tp_dictoffset */
-    (initproc) ZCurveEncoder_init,
+    (initproc) ZcurveEncoder_init,
     NULL, /* tp_alloc */
-    ZCurveEncoder_new
+    ZcurveEncoder_new
 };
-/* ZCurvePlotter Python Object */
-typedef struct ZCurvePlotterObject {
+/* ZcurvePlotter Python Object */
+typedef struct ZcurvePlotterObject {
     PyObject_HEAD
     /* 
      * A Python str stores nucleic acid sequence information.
-     * It is a completely 'private' member that can only be handled by ZCurvePlotter itself.
+     * It is a completely 'private' member that can only be handled by ZcurvePlotter itself.
      * The C++ object's char array member shares the same memory with pyStr.
      */
     PyObject *pyStr;
-    /* The same as ZCurveEncoder Python Object*/
+    /* The same as ZcurveEncoder Python Object*/
     int len;
     char *cppStr;
-} ZCurvePlotterObject;
-/* ZCurvePlotter.__del__ */
-static void ZCurvePlotter_dealloc(ZCurvePlotterObject *self) {
+} ZcurvePlotterObject;
+/* ZcurvePlotter.__del__ */
+static void ZcurvePlotter_dealloc(ZcurvePlotterObject *self) {
     /* PASS 2025-02-25 */
     Py_XDECREF(self->pyStr);
     Py_TYPE(self)->tp_free((PyObject *) self);
 };
-/* ZCurvePlotter.__new__ */
-static PyObject *ZCurvePlotter_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+/* ZcurvePlotter.__new__ */
+static PyObject *ZcurvePlotter_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     /* PASS 2025-02-25 */
-    ZCurvePlotterObject *self;
+    ZcurvePlotterObject *self;
     
-    self = (ZCurvePlotterObject *) type->tp_alloc(type, 0);
+    self = (ZcurvePlotterObject *) type->tp_alloc(type, 0);
     self->pyStr = NULL;
     self->cppStr = NULL;
 
     return (PyObject *) self;
 }
-/* ZCurvePlotter.__init__ */
-static int ZCurvePlotter_init(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+/* ZcurvePlotter.__init__ */
+static int ZcurvePlotter_init(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     static char *kwlist[] = {"seq_or_record", NULL};
     PyObject *seq_or_record;
@@ -1000,9 +999,9 @@ static int ZCurvePlotter_init(ZCurvePlotterObject *self, PyObject *args, PyObjec
 
     return 0;
 }
-/* ZCurvePlotter.__repr__ */
+/* ZcurvePlotter.__repr__ */
 /*
- * Represent the current sequence information being handled by ZCurveEncoder.
+ * Represent the current sequence information being handled by ZcurveEncoder.
  *
  * When the length of sequence less than 60, it displays the complete sequence;
  * else it only displays the opening part and the ending part.
@@ -1010,25 +1009,25 @@ static int ZCurvePlotter_init(ZCurvePlotterObject *self, PyObject *args, PyObjec
  * Call by PyObject_Str and PyObject_Repr
  */
 static PyObject *
-ZCurvePlotter_repr(ZCurvePlotterObject *self, PyObject *Py_UNUSED(ignored)) {
+ZcurvePlotter_repr(ZcurvePlotterObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-25 */
     char message[75];
     int l;
     
     if ((l = self->len) <= 60)
-        strcat(strcat(strcpy(message, "ZCurvePlotter(\""), self->cppStr), "\")");
+        strcat(strcat(strcpy(message, "ZcurvePlotter(\""), self->cppStr), "\")");
     else {
-        strncat(strcpy(message, "ZCurvePlotter(\""), self->cppStr, 29);
+        strncat(strcpy(message, "ZcurvePlotter(\""), self->cppStr, 29);
         strcat(strcat(strcpy(message + 40, "..."), self->cppStr + l - 29), "\")");
     }
 
     return Py_BuildValue("s", message);
 }
-/* ZCurvePlotter.z_curve */
+/* ZcurvePlotter.z_curve */
 static PyObject *
-ZCurvePlotter_zCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_zCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
-    int len = self->len, window = 0, i, j;
+    int len = self->len, window = 0, i;
     float *params[3];
     bool back = true;
 
@@ -1056,9 +1055,9 @@ ZCurvePlotter_zCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
 
     return paramList;
 }
-/* ZCurvePlotter.RY_disparity */
+/* ZcurvePlotter.RY_disparity */
 static PyObject *
-ZCurvePlotter_RYDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_RYDisparity(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     float *params = new float[len];
@@ -1072,9 +1071,9 @@ ZCurvePlotter_RYDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *k
     
     return retr;
 }
-/* ZCurvePlotter.MK_disparity */
+/* ZcurvePlotter.MK_disparity */
 static PyObject *
-ZCurvePlotter_MKDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_MKDisparity(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     float *params = new float[len];
@@ -1088,9 +1087,9 @@ ZCurvePlotter_MKDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *k
     
     return retr;
 }
-/* ZCurvePlotter.WS_disparity */
+/* ZcurvePlotter.WS_disparity */
 static PyObject *
-ZCurvePlotter_WSDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_WSDisparity(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     float *params = new float[len];
@@ -1104,9 +1103,9 @@ ZCurvePlotter_WSDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *k
     
     return retr;
 }
-/* ZCurvePlotter.AT_disparity */
+/* ZcurvePlotter.AT_disparity */
 static PyObject *
-ZCurvePlotter_ATDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_ATDisparity(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     float *params = new float[len];
@@ -1120,9 +1119,9 @@ ZCurvePlotter_ATDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *k
     
     return retr;
 }
-/* ZCurvePlotter.GC_disparity */
+/* ZcurvePlotter.GC_disparity */
 static PyObject *
-ZCurvePlotter_GCDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_GCDisparity(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     float *params = new float[len];
@@ -1136,9 +1135,9 @@ ZCurvePlotter_GCDisparity(ZCurvePlotterObject *self, PyObject *args, PyObject *k
     
     return retr;
 }
-/* ZCurvePlotter.CpG_prime_curve */
+/* ZcurvePlotter.CpG_prime_curve */
 static PyObject *
-ZCurvePlotter_CpGPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_CpGPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len - 1, window = 0;
     float *params = new float[len], k;
@@ -1163,9 +1162,9 @@ ZCurvePlotter_CpGPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
 
     return retr;
 }
-/* ZCurvePlotter.x_prime_curve */
+/* ZcurvePlotter.x_prime_curve */
 static PyObject *
-ZCurvePlotter_xPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_xPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     bool back = true;
@@ -1190,9 +1189,9 @@ ZCurvePlotter_xPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *k
 
     return retr;
 }
-/* ZCurvePlotter.y_prime_curve */
+/* ZcurvePlotter.y_prime_curve */
 static PyObject *
-ZCurvePlotter_yPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_yPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     bool back = true;
@@ -1217,9 +1216,9 @@ ZCurvePlotter_yPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *k
 
     return retr;
 }
-/* ZCurvePlotter.z_prime_curve */
+/* ZcurvePlotter.z_prime_curve */
 static PyObject *
-ZCurvePlotter_zPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_zPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     bool back = true;
@@ -1244,9 +1243,9 @@ ZCurvePlotter_zPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *k
 
     return retr;
 }
-/* ZCurvePlotter.z_prime_curve */
+/* ZcurvePlotter.z_prime_curve */
 static PyObject *
-ZCurvePlotter_atPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_atPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     bool back = true;
@@ -1271,9 +1270,9 @@ ZCurvePlotter_atPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *
 
     return retr;
 }
-/* ZCurvePlotter.z_prime_curve */
+/* ZcurvePlotter.z_prime_curve */
 static PyObject *
-ZCurvePlotter_gcPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_gcPrimeCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, window = 0;
     bool back = true;
@@ -1298,9 +1297,9 @@ ZCurvePlotter_gcPrimeCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *
 
     return retr;
 }
-/* ZCurvePlotter.genome_dS_curve */
+/* ZcurvePlotter.genome_dS_curve */
 static PyObject *
-ZCurvePlotter_genomeDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_genomeDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1331,9 +1330,9 @@ ZCurvePlotter_genomeDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObj
     
     return retr;
 }
-/* ZCurvePlotter.RY_dS_curve */
+/* ZcurvePlotter.RY_dS_curve */
 static PyObject *
-ZCurvePlotter_ryDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_ryDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1365,9 +1364,9 @@ ZCurvePlotter_ryDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
     
     return retr;
 }
-/* ZCurvePlotter.MK_dS_curve */
+/* ZcurvePlotter.MK_dS_curve */
 static PyObject *
-ZCurvePlotter_mkDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_mkDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1399,9 +1398,9 @@ ZCurvePlotter_mkDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
     
     return retr;
 }
-/* ZCurvePlotter.WS_dS_curve */
+/* ZcurvePlotter.WS_dS_curve */
 static PyObject *
-ZCurvePlotter_wsDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_wsDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1433,9 +1432,9 @@ ZCurvePlotter_wsDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
     
     return retr;
 }
-/* ZCurvePlotter.AT_dS_curve */
+/* ZcurvePlotter.AT_dS_curve */
 static PyObject *
-ZCurvePlotter_atDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_atDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1467,9 +1466,9 @@ ZCurvePlotter_atDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
     
     return retr;
 }
-/* ZCurvePlotter.GC_dS_curve */
+/* ZcurvePlotter.GC_dS_curve */
 static PyObject *
-ZCurvePlotter_gcDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_gcDeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1501,9 +1500,9 @@ ZCurvePlotter_gcDeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject 
     
     return retr;
 }
-/* ZCurvePlotter.CpG_dS_curve */
+/* ZcurvePlotter.CpG_dS_curve */
 static PyObject *
-ZCurvePlotter_CpGdeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_CpGdeltaSCurve(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-25 */
     int len = self->len, m, window = 0;
     bool back = true;
@@ -1535,9 +1534,23 @@ ZCurvePlotter_CpGdeltaSCurve(ZCurvePlotterObject *self, PyObject *args, PyObject
     
     return retr;
 }
-/* ZCurvePlotter.AT_skew */
+/* ZcurvePlotter.WS_skew */
 static PyObject *
-ZCurvePlotter_ATSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_WSSkew(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
+    int len = self->len, window = 100;
+    bool back = true;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "|ib", kwListCurve, &window, &back))
+        Py_RETURN_NONE;
+
+    if (window < 50) window = 50;
+    float *params = new float[len];
+    WSSkew(self->cppStr, len, window, params);
+    return toCurve(params, len, back);
+}
+/* ZcurvePlotter.AT_skew */
+static PyObject *
+ZcurvePlotter_ATSkew(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     int len = self->len, window = 100;
     bool back = true;
 
@@ -1549,9 +1562,9 @@ ZCurvePlotter_ATSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
     ATSkew(self->cppStr, len, window, params);
     return toCurve(params, len, back);
 }
-/* ZCurvePlotter.GC_skew */
+/* ZcurvePlotter.GC_skew */
 static PyObject *
-ZCurvePlotter_GCSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+ZcurvePlotter_GCSkew(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     int len = self->len, window = 100;
     bool back = true;
 
@@ -1563,43 +1576,74 @@ ZCurvePlotter_GCSkew(ZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
     GCSkew(self->cppStr, len, window, params);
     return toCurve(params, len, back);
 }
-/* ZCurvePlotter methods */
-static PyMethodDef ZCurvePlotter_methods[] = {
-    {"z_curve", (PyCFunction) ZCurvePlotter_zCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"RY_disparity", (PyCFunction) ZCurvePlotter_RYDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"MK_disparity", (PyCFunction) ZCurvePlotter_MKDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"WS_disparity", (PyCFunction) ZCurvePlotter_WSDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"AT_disparity", (PyCFunction) ZCurvePlotter_ATDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"GC_disparity", (PyCFunction) ZCurvePlotter_GCDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"AT_skew", (PyCFunction) ZCurvePlotter_ATSkew, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"GC_skew", (PyCFunction) ZCurvePlotter_GCSkew, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"x_prime_curve", (PyCFunction) ZCurvePlotter_xPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"y_prime_curve", (PyCFunction) ZCurvePlotter_yPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"z_prime_curve", (PyCFunction) ZCurvePlotter_zPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"AT_prime_curve", (PyCFunction) ZCurvePlotter_atPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"GC_prime_curve", (PyCFunction) ZCurvePlotter_gcPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"CpG_prime_curve", (PyCFunction) ZCurvePlotter_CpGPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"genome_dS_curve", (PyCFunction) ZCurvePlotter_genomeDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"RY_dS_curve", (PyCFunction) ZCurvePlotter_ryDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"MK_dS_curve", (PyCFunction) ZCurvePlotter_mkDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"WS_dS_curve", (PyCFunction) ZCurvePlotter_wsDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"AT_dS_curve", (PyCFunction) ZCurvePlotter_atDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"GC_dS_curve", (PyCFunction) ZCurvePlotter_gcDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
-    {"CpG_dS_curve", (PyCFunction) ZCurvePlotter_CpGdeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+/* ZcurvePlotter.AT_fraction */
+static PyObject *
+ZcurvePlotter_ATFraction(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
+    int len = self->len, window = 100;
+    bool back = true;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "|ib", kwListCurve, &window, &back))
+        Py_RETURN_NONE;
+
+    if (window < 50) window = 50;
+    float *params = new float[len];
+    ATFraction(self->cppStr, len, window, params);
+    return toCurve(params, len, back);
+}
+/* ZcurvePlotter.GC_fraction */
+static PyObject *
+ZcurvePlotter_GCFraction(ZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
+    int len = self->len, window = 100;
+    bool back = true;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kw, "|ib", kwListCurve, &window, &back))
+        Py_RETURN_NONE;
+
+    if (window < 50) window = 50;
+    float *params = new float[len];
+    GCFraction(self->cppStr, len, window, params);
+    return toCurve(params, len, back);
+}
+/* ZcurvePlotter methods */
+static PyMethodDef ZcurvePlotter_methods[] = {
+    {"z_curve", (PyCFunction) ZcurvePlotter_zCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"RY_disparity", (PyCFunction) ZcurvePlotter_RYDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"MK_disparity", (PyCFunction) ZcurvePlotter_MKDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"WS_disparity", (PyCFunction) ZcurvePlotter_WSDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_disparity", (PyCFunction) ZcurvePlotter_ATDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_disparity", (PyCFunction) ZcurvePlotter_GCDisparity, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"WS_skew", (PyCFunction) ZcurvePlotter_WSSkew, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_skew", (PyCFunction) ZcurvePlotter_ATSkew, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_skew", (PyCFunction) ZcurvePlotter_GCSkew, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_fraction", (PyCFunction) ZcurvePlotter_ATFraction, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_fraction", (PyCFunction) ZcurvePlotter_GCFraction, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"x_prime_curve", (PyCFunction) ZcurvePlotter_xPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"y_prime_curve", (PyCFunction) ZcurvePlotter_yPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"z_prime_curve", (PyCFunction) ZcurvePlotter_zPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_prime_curve", (PyCFunction) ZcurvePlotter_atPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_prime_curve", (PyCFunction) ZcurvePlotter_gcPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"CpG_prime_curve", (PyCFunction) ZcurvePlotter_CpGPrimeCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"genome_dS_curve", (PyCFunction) ZcurvePlotter_genomeDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"RY_dS_curve", (PyCFunction) ZcurvePlotter_ryDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"MK_dS_curve", (PyCFunction) ZcurvePlotter_mkDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"WS_dS_curve", (PyCFunction) ZcurvePlotter_wsDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"AT_dS_curve", (PyCFunction) ZcurvePlotter_atDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"GC_dS_curve", (PyCFunction) ZcurvePlotter_gcDeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
+    {"CpG_dS_curve", (PyCFunction) ZcurvePlotter_CpGdeltaSCurve, METH_VARARGS|METH_KEYWORDS, NULL},
     {NULL, NULL, 0, NULL}
 };
-/* ZCurvePlotter type */
-PyTypeObject ZCurvePlotterType = {
+/* ZcurvePlotter type */
+PyTypeObject ZcurvePlotterType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_ZCurvePy.ZCurvePlotter",
-    sizeof(ZCurvePlotterObject),
+    "_ZcurvePy.ZcurvePlotter",
+    sizeof(ZcurvePlotterObject),
     0,
-    (destructor) ZCurvePlotter_dealloc,
+    (destructor) ZcurvePlotter_dealloc,
     NULL, /* tp_vectorcall_offset */
     NULL, /* tp_getattr */
     NULL, /* tp_setattr */
     NULL, /* tp_as_async */
-    (reprfunc) ZCurvePlotter_repr,
+    (reprfunc) ZcurvePlotter_repr,
     NULL, /* tp_as_number */
     NULL, /* tp_as_sequence */
     NULL, /* tp_as_mapping */
@@ -1617,7 +1661,7 @@ PyTypeObject ZCurvePlotterType = {
     NULL, /* tp_weaklistoffset */
     NULL, /* tp_iter */ 
     NULL, /* tp_iternext */ 
-    ZCurvePlotter_methods,
+    ZcurvePlotter_methods,
     NULL, /* tp_members */ 
     NULL, /* tp_getset */
     NULL, /* tp_base */
@@ -1625,15 +1669,15 @@ PyTypeObject ZCurvePlotterType = {
     NULL, /* tp_descr_get */ 
     NULL, /* tp_descr_set */ 
     NULL, /* tp_dictoffset */ 
-    (initproc) ZCurvePlotter_init,
+    (initproc) ZcurvePlotter_init,
     NULL, /* tp_alloc */
-    ZCurvePlotter_new
+    ZcurvePlotter_new
 };
-/* BatchZCurveEncoder Python object */
+/* BatchZcurveEncoder Python object */
 /*
- * The multi-thread version of ZCurveEncoder
+ * The multi-thread version of ZcurveEncoder
  */
-typedef struct BatchZCurveEncoderObject {
+typedef struct BatchZcurveEncoderObject {
     PyObject_HEAD
     int nJobs;  // the number of threads used in coding progress
     int nTrans;  // the number of Z-curve coding layers
@@ -1642,13 +1686,13 @@ typedef struct BatchZCurveEncoderObject {
     bool *freqList;  // the list of frequencization usage in each layer
     bool *localList;  // the list of local mode usage in each layer
     int *nParamList;  // the list of number of parameters in each layer
-    int finalNParams;  // total parameters generated by BatchZCurveEncoder
-} BatchZCurveEncoderObject;
-/* Print the summary information of BatchZCurveEncoder */
-static PyObject *BatchZCurveEncoder_repr(BatchZCurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
+    int finalNParams;  // total parameters generated by BatchZcurveEncoder
+} BatchZcurveEncoderObject;
+/* Print the summary information of BatchZcurveEncoder */
+static PyObject *BatchZcurveEncoder_repr(BatchZcurveEncoderObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-02-26 */
     char message[4096];
-    strcpy(message, "ZCurveEncoder:\n");
+    strcpy(message, "ZcurveEncoder:\n");
 
     for (int i = 0; i < self->nTrans; i ++) {
         char item[512];
@@ -1669,10 +1713,10 @@ static PyObject *BatchZCurveEncoder_repr(BatchZCurveEncoderObject *self, PyObjec
 }
 /* Reset the hyper-parameters */
 /* 
- * Util for BatchZCurveEncoder. (Not PyCFunction)
- * @param pyObject: BatchZCurveEncoder Python object
+ * Util for BatchZcurveEncoder. (Not PyCFunction)
+ * @param pyObject: BatchZcurveEncoder Python object
  */
-static void resetParams(BatchZCurveEncoderObject *pyObject) {
+static void resetParams(BatchZcurveEncoderObject *pyObject) {
     /* PASS 2025-02-26 */
     // Reset the list of k-mer length in each layer
     delete[] pyObject->kList;
@@ -1694,11 +1738,11 @@ static void resetParams(BatchZCurveEncoderObject *pyObject) {
 }
 /* Reload the hyper-parameters */
 /* 
- * Util for BatchZCurveEncoder. (Not PyCFunction)
- * @param pyObject: BatchZCurveEncoder Python object
+ * Util for BatchZcurveEncoder. (Not PyCFunction)
+ * @param pyObject: BatchZcurveEncoder Python object
  * @param hyperParams: Python Iterable object contains Python dicts
  */
-static void BatchZCurveEncoder_loadParams(BatchZCurveEncoderObject *pyObject, PyObject *hyperParams) {
+static void BatchZcurveEncoder_loadParams(BatchZcurveEncoderObject *pyObject, PyObject *hyperParams) {
     /* PASS 2025-02-26 */
     resetParams(pyObject);
     
@@ -1763,13 +1807,13 @@ static void BatchZCurveEncoder_loadParams(BatchZCurveEncoderObject *pyObject, Py
 }
 /* Coding process using multi-thread */
 /* 
- * Util for BatchZCurveEncoder. (Not PyCFunction)
+ * Util for BatchZcurveEncoder. (Not PyCFunction)
  * @param paramList: temporary storage of params
  * @param count: the size if paramList
  * @param cppSeqs: target sequences as C/C++ char array
- * @param pyObject: BatchZCurveEncoder Python object
+ * @param pyObject: BatchZcurveEncoder Python object
  */
-static void multiThreadCoding(float **paramList, int count,std::vector<char *> &cppSeqs, BatchZCurveEncoderObject *self) {
+static void multiThreadCoding(float **paramList, int count,std::vector<char *> &cppSeqs, BatchZcurveEncoderObject *self) {
     /* PASS 2025-02-26 */
     int nJobs = self->nJobs;
     std::thread **threads = new std::thread *[nJobs];
@@ -1799,12 +1843,12 @@ static void multiThreadCoding(float **paramList, int count,std::vector<char *> &
 
     delete[] threads;
 }
-/* BatchZCurveEncoder.__new__ */
-static PyObject *BatchZCurveEncoder_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
+/* BatchZcurveEncoder.__new__ */
+static PyObject *BatchZcurveEncoder_new(PyTypeObject *type, PyObject *args, PyObject *kwds) {
     /* PASS 2025-02-26 */
-    BatchZCurveEncoderObject *self;
+    BatchZcurveEncoderObject *self;
     
-    self = (BatchZCurveEncoderObject *) type->tp_alloc(type, 0);
+    self = (BatchZcurveEncoderObject *) type->tp_alloc(type, 0);
     // Init hyper-parameters
     self->nTrans = 0;
     self->kList = NULL;
@@ -1815,17 +1859,17 @@ static PyObject *BatchZCurveEncoder_new(PyTypeObject *type, PyObject *args, PyOb
 
     return (PyObject *) self;
 }
-/* BatchZCurveEncoder.__del__ */
-static void BatchZCurveEncoder_dealloc(BatchZCurveEncoderObject *self) {
+/* BatchZcurveEncoder.__del__ */
+static void BatchZcurveEncoder_dealloc(BatchZcurveEncoderObject *self) {
     /* PASS 2025-02-26 */
     resetParams(self);
     Py_TYPE(self)->tp_free((PyObject *) self);
 };
-/* BatchZCurveEncoder.__call__ */
+/* BatchZcurveEncoder.__call__ */
 /* 
  * @param batch: iterable python object
  */
-static PyObject *BatchZCurveEncoder_call(BatchZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *BatchZcurveEncoder_call(BatchZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-26 */
     static char *kwlist[] = {"batch", NULL};
     PyObject *data;
@@ -1871,7 +1915,7 @@ static PyObject *BatchZCurveEncoder_call(BatchZCurveEncoderObject *self, PyObjec
 
     return retr;
 }
-/* ZCurvePy.BatchZCurveEncoder.dump */
+/* ZcurvePy.BatchZcurveEncoder.dump */
 /* Save params into a file instead of return python list
  * 
  * @param batch: batch of sequences to handle
@@ -1879,7 +1923,7 @@ static PyObject *BatchZCurveEncoder_call(BatchZCurveEncoderObject *self, PyObjec
  * 
  * @return  whether saved successfully or not
  */
-static PyObject *BatchZCurveEncoder_dump(BatchZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static PyObject *BatchZcurveEncoder_dump(BatchZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-26 */
     static char *kwlist[] = {"batch", "save_path", NULL};
     PyObject *data;
@@ -1932,14 +1976,14 @@ static PyObject *BatchZCurveEncoder_dump(BatchZCurveEncoderObject *self, PyObjec
 
     Py_RETURN_TRUE;
 }
-/* BatchZCurveEncoder.__init__ */
+/* BatchZcurveEncoder.__init__ */
 /*
- * init function for BatchZCurveEncoder
+ * init function for BatchZcurveEncoder
  * @param hyper_params: Python Iterable object contains Python dicts.
  * @param n_jobs: number of threads used. 
  *                (Determined by number of CPUs when incorrect value given).
  */
-static int BatchZCurveEncoder_init(BatchZCurveEncoderObject *self, PyObject *args, PyObject *kw) {
+static int BatchZcurveEncoder_init(BatchZcurveEncoderObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-02-26 */
     static char *kwList[] = {"hyper_params", "n_jobs", NULL};
     int nJobs = -1;
@@ -1953,21 +1997,21 @@ static int BatchZCurveEncoder_init(BatchZCurveEncoderObject *self, PyObject *arg
     self->nJobs = nJobs;
 
     if (hyperParams != NULL)
-        BatchZCurveEncoder_loadParams(self, hyperParams);
+        BatchZcurveEncoder_loadParams(self, hyperParams);
     return 0;
 }
-/* ZCurvePy.BatchZCurveEncoder member methods */
-static PyMethodDef BatchZCurveEncoder_methods[] = {
-    {"dump", (PyCFunction) BatchZCurveEncoder_dump, METH_VARARGS|METH_KEYWORDS, NULL},
+/* ZcurvePy.BatchZcurveEncoder member methods */
+static PyMethodDef BatchZcurveEncoder_methods[] = {
+    {"dump", (PyCFunction) BatchZcurveEncoder_dump, METH_VARARGS|METH_KEYWORDS, NULL},
     {NULL, NULL, 0, NULL}
 };
-/* ZCurvePy.BatchZCurveEncoder type */
-PyTypeObject BatchZCurveEncoderType = {
+/* ZcurvePy.BatchZcurveEncoder type */
+PyTypeObject BatchZcurveEncoderType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_ZCurvePy.BatchZCurveEncoder",
-    sizeof(BatchZCurveEncoderObject),
+    "_ZcurvePy.BatchZcurveEncoder",
+    sizeof(BatchZcurveEncoderObject),
     0,
-    (destructor) BatchZCurveEncoder_dealloc,
+    (destructor) BatchZcurveEncoder_dealloc,
     NULL, /* tp_vectorcall_offset */
     NULL, /* tp_getattr */
     NULL, /* tp_setattr */
@@ -1977,8 +2021,8 @@ PyTypeObject BatchZCurveEncoderType = {
     NULL, /* tp_as_sequence */
     NULL, /* tp_as_mapping */
     NULL, /* tp_hash */
-    (ternaryfunc) BatchZCurveEncoder_call,
-    (reprfunc) BatchZCurveEncoder_repr,
+    (ternaryfunc) BatchZcurveEncoder_call,
+    (reprfunc) BatchZcurveEncoder_repr,
     NULL, /* tp_getattro */
     NULL, /* tp_setattro */
     NULL, /* tp_as_buffer */
@@ -1990,7 +2034,7 @@ PyTypeObject BatchZCurveEncoderType = {
     NULL, /* tp_weaklistoffset */
     NULL, /* tp_iter */ 
     NULL, /* tp_iternext */ 
-    BatchZCurveEncoder_methods,
+    BatchZcurveEncoder_methods,
     NULL, /* tp_members */ 
     NULL, /* tp_getset */
     NULL, /* tp_base */
@@ -1998,19 +2042,19 @@ PyTypeObject BatchZCurveEncoderType = {
     NULL, /* tp_descr_get */ 
     NULL, /* tp_descr_set */ 
     NULL, /* tp_dictoffset */ 
-    (initproc) BatchZCurveEncoder_init,
+    (initproc) BatchZcurveEncoder_init,
     NULL, /* tp_alloc */
-    BatchZCurveEncoder_new
+    BatchZcurveEncoder_new
 };
-/* ZCurvePy.BatchZCurvePlotterObject */
-typedef struct BatchZCurvePlotterObject {
+/* ZcurvePy.BatchZcurvePlotterObject */
+typedef struct BatchZcurvePlotterObject {
     PyObject_HEAD
     int mode;  // plotter mode choosed from {"accum", "profile", "tetra"}
     int window;  // window size of mean smoothing operation
     int nJobs;  // number of thread used
-} BatchZCurvePlotterObject;
-/* ZCurvePy.BatchZCurvePlotterObject.__init__ */
-static int BatchZCurvePlotter_init(BatchZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+} BatchZcurvePlotterObject;
+/* ZcurvePy.BatchZcurvePlotterObject.__init__ */
+static int BatchZcurvePlotter_init(BatchZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-03-01 */
     static char *kwlist[] = {"mode", "window", "n_jobs", NULL};
     int mode = 0;
@@ -2035,16 +2079,16 @@ static int BatchZCurvePlotter_init(BatchZCurvePlotterObject *self, PyObject *arg
 
     return 0;
 }
-/* ZCurvePy.BatchZCurvePlotterObject.__repr__ */
-static PyObject *BatchZCurvePlotter_repr(BatchZCurvePlotterObject *self, PyObject *Py_UNUSED(ignored)) {
+/* ZcurvePy.BatchZcurvePlotterObject.__repr__ */
+static PyObject *BatchZcurvePlotter_repr(BatchZcurvePlotterObject *self, PyObject *Py_UNUSED(ignored)) {
     /* PASS 2025-03-01 */
     char buf[128];
-    sprintf(buf, "BatchZCurvePlotter(mode=\"%s\", window=%d, n_jobs=%d)\n", 
+    sprintf(buf, "BatchZcurvePlotter(mode=\"%s\", window=%d, n_jobs=%d)\n", 
             plotterMode[self->mode], self->window, self->nJobs);
     return Py_BuildValue("s", buf);
 }
-/* ZCurvePy.BatchZCurvePlotterObject.__dealloc__ */
-static void BatchZCurvePlotter_dealloc(BatchZCurvePlotterObject *self) {
+/* ZcurvePy.BatchZcurvePlotterObject.__dealloc__ */
+static void BatchZcurvePlotter_dealloc(BatchZcurvePlotterObject *self) {
     /* PASS 2025-03-01 */
     Py_TYPE(self)->tp_free((PyObject *) self);
 }
@@ -2098,13 +2142,13 @@ static void multiThreadPlotting(
 
     delete[] threads;
 }
-/* BatchZCurvePlotter.__call__ */
+/* BatchZcurvePlotter.__call__ */
 /* run batch z-curve plotter
  * 
  * @param batch:  batch dataset of sequences
  * @param only_k: only return k-values
  */
-static PyObject *BatchZCurvePlotter_call(BatchZCurvePlotterObject *self, PyObject *args, PyObject *kw) {
+static PyObject *BatchZcurvePlotter_call(BatchZcurvePlotterObject *self, PyObject *args, PyObject *kw) {
     /* PASS 2025-03-01 */
     static char *kwlist[] = {"batch", "only_k", NULL};
     std::vector<PyObject *> pySeqs;
@@ -2200,13 +2244,13 @@ static PyObject *BatchZCurvePlotter_call(BatchZCurvePlotterObject *self, PyObjec
 
     return retr;
 }
-/* ZCurvePy.BatchZCurveEncoder type */
-PyTypeObject BatchZCurvePlotterType = {
+/* ZcurvePy.BatchZcurveEncoder type */
+PyTypeObject BatchZcurvePlotterType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-    "_ZCurvePy.BatchZCurvePlotter",
-    sizeof(BatchZCurveEncoderObject),
+    "_ZcurvePy.BatchZcurvePlotter",
+    sizeof(BatchZcurveEncoderObject),
     0,
-    (destructor) BatchZCurvePlotter_dealloc,
+    (destructor) BatchZcurvePlotter_dealloc,
     NULL, /* tp_vectorcall_offset */
     NULL, /* tp_getattr */
     NULL, /* tp_setattr */
@@ -2216,8 +2260,8 @@ PyTypeObject BatchZCurvePlotterType = {
     NULL, /* tp_as_sequence */
     NULL, /* tp_as_mapping */
     NULL, /* tp_hash */
-    (ternaryfunc) BatchZCurvePlotter_call,
-    (reprfunc) BatchZCurvePlotter_repr,
+    (ternaryfunc) BatchZcurvePlotter_call,
+    (reprfunc) BatchZcurvePlotter_repr,
     NULL, /* tp_getattro */
     NULL, /* tp_setattro */
     NULL, /* tp_as_buffer */
@@ -2237,7 +2281,7 @@ PyTypeObject BatchZCurvePlotterType = {
     NULL, /* tp_descr_get */ 
     NULL, /* tp_descr_set */ 
     NULL, /* tp_dictoffset */ 
-    (initproc) BatchZCurvePlotter_init,
+    (initproc) BatchZcurvePlotter_init,
     NULL, /* tp_alloc */
     PyType_GenericNew,
 };
